@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/border"
+    android:padding="10dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/propertyImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="top"
+        android:foreground="@drawable/ic_launcher_foreground"
+        android:background="@color/md_theme_dark_secondaryContainer"
+        app:shapeAppearanceOverlay="@style/circleImageView" />
+
+    <LinearLayout
+        android:layout_marginStart="5dp"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/propertyName"
+            android:text="@string/property_default_name"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/propertyCurrentValue"
+            android:text="@string/property_default_name"
+            android:typeface="monospace"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/propertyExpanded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/property_real"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/propertyRealValue"
+                android:text="@string/property_default_value"
+                android:typeface="monospace"
+                android:textSize="14sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/property_fake"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/propertyFakeValue"
+                android:text="@string/property_default_value"
+                android:typeface="monospace"
+                android:textSize="14sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/propertyToggleFake"
+        style="@style/Theme.OpenFaker"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center" />
+
+</LinearLayout>
