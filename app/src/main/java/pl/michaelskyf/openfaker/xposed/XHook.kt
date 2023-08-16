@@ -1,22 +1,31 @@
 package pl.michaelskyf.openfaker.xposed
 
 import android.content.ContentResolver
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import java.lang.Exception
-import java.util.logging.Logger
+import pl.michaelskyf.openfaker.BuildConfig
 
 typealias ClassMethodPair = Pair<String, String>
 typealias TypeValuePair = Pair<Class<*>, *>
 typealias MethodFakeValueArgsPair = Pair<Any, Array<TypeValuePair>>
 
+data class MethodArguments(
+
+    val className: String,
+    val methodName: String,
+    val fakeValue: Any,
+    val typeValuePairArray: Array<TypeValuePair>
+)
+
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    private val hook = Hook(XHookHelper(), mutableMapOf())
+    private var hook = Hook(XHookHelper(), mapOf())
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
@@ -24,13 +33,26 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         hook.handleLoadPackage(param)
     }
 
+    // TODO: move json code to its own class
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam?) {
 
         XposedBridge.log("OpenFaker: Initializing")
 
-        val classMethodPair = Pair("android.provider.Settings\$Secure", "getString")
-        val arguments: Array<TypeValuePair> = arrayOf( Pair(ContentResolver::class.java, null), Pair(String::class.java, "android_id") )
-        val fakeValueArgsPair: MethodFakeValueArgsPair = Pair("Fake Value", arguments)
-        hook.functionInfoMap[classMethodPair] = fakeValueArgsPair
+        val newMap = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
+
+        val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID, PrefsListener().prefName)
+
+        val json = preferences.getString("xposed_method_args", null)
+            ?: return
+
+        val argumentArray = Gson().fromJson(json, Array<MethodArguments>::class.java)
+            ?: return
+
+        for (arg in argumentArray) {
+
+            newMap[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, arg.typeValuePairArray)
+        }
+
+        hook = Hook(XHookHelper(), newMap)
     }
 }

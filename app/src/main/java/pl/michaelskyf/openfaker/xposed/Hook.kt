@@ -3,7 +3,7 @@ package pl.michaelskyf.openfaker.xposed
 import de.robv.android.xposed.XC_MethodHook
 import pl.michaelskyf.openfaker.BuildConfig
 
-class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<ClassMethodPair, MethodFakeValueArgsPair>) {
+class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPair, MethodFakeValueArgsPair>) {
 
     fun handleLoadPackage(param: LoadPackageParam) {
 
@@ -12,7 +12,7 @@ class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<C
             return
         }
 
-        for ((key, value) in functionInfoMap)
+        for ((key, value) in methodArgs)
         {
             val className = key.first
             val methodName = key.second
@@ -32,10 +32,10 @@ class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<C
         fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
 
             // If info wasn't found, don't do anything
-            val functionInfo = functionInfoMap[Pair(param.method.declaringClass.name, param.method.name)]
+            val functionArgs = methodArgs[Pair(param.method.declaringClass.name, param.method.name)]
                 ?: return
 
-            for ((index, typeValuePair) in functionInfo.second.withIndex())
+            for ((index, typeValuePair) in functionArgs.second.withIndex())
             {
                 // Continue if we ignore the argument
                 val arg = typeValuePair.second
@@ -49,7 +49,7 @@ class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<C
             }
 
             // Should we check if result has the same type as functionInfo.first?
-            param.result = functionInfo.first
+            param.result = functionArgs.first
         }
     }
 }
