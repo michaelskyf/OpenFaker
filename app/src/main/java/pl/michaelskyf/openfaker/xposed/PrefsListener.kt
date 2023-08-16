@@ -1,6 +1,6 @@
 package pl.michaelskyf.openfaker.xposed
 
-class XposedPrefsListener {
+class PrefsListener {
 
     public final val prefName = "xposed_prefs_conf"
 

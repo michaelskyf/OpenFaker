@@ -1,23 +1,17 @@
 package pl.michaelskyf.openfaker
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.TextView
-import androidx.core.content.edit
 import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
-import de.robv.android.xposed.XSharedPreferences
 import pl.michaelskyf.openfaker.databinding.OptionRowBinding
-import pl.michaelskyf.openfaker.xposed.XposedPrefsListener
 
 class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder>()
 {
