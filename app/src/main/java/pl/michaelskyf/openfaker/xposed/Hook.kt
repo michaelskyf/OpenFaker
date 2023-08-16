@@ -38,7 +38,7 @@ class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<C
         fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
 
             // If info wasn't found, don't do anything
-            val functionInfo = functionInfoMap[Pair(param.thisObject.toString(), param.method.toString())]
+            val functionInfo = functionInfoMap[Pair(param.method.declaringClass.name, param.method.name)]
                 ?: return
 
             for ((index, typeValuePair) in functionInfo.second.withIndex())

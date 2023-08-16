@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.xposed
 
+import android.content.ContentResolver
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XC_MethodHook
@@ -27,8 +28,8 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         XposedBridge.log("OpenFaker: Initializing")
 
-        val classMethodPair = Pair("com.android.providers.settings.SettingsProvider", "getString")
-        val arguments: Array<TypeValuePair> = arrayOf( Pair(String::class.java, "android_id") )
+        val classMethodPair = Pair("android.provider.Settings\$Secure", "getString")
+        val arguments: Array<TypeValuePair> = arrayOf( Pair(ContentResolver::class.java, null), Pair(String::class.java, "android_id") )
         val fakeValueArgsPair: MethodFakeValueArgsPair = Pair("Fake Value", arguments)
         hook.functionInfoMap[classMethodPair] = fakeValueArgsPair
     }
