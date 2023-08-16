@@ -1,19 +1,23 @@
 package pl.michaelskyf.openfaker.xposed
 
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
+import java.lang.reflect.Member
 
 class XHookHelper : HookHelper() {
 
-    override fun findAndHookMethod(
+    override fun findMethod(
         className: String,
         classLoader: ClassLoader,
         methodName: String,
-        callback: Hook.MethodHookHandler,
         vararg parameterTypes: Class<*>
-    ) {
+    ): Member? {
 
-        val xMethodHookHandler = XMethodHookHandler(callback)
+        return XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes)
+    }
 
-        XposedHelpers.findAndHookMethod(className, classLoader, methodName, *parameterTypes, xMethodHookHandler)
+    override fun hookMethod(member: Member, callback: Hook.MethodHookHandler) {
+
+        XposedBridge.hookMethod(member, XMethodHookHandler(callback))
     }
 }

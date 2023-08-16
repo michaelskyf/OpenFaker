@@ -3,7 +3,6 @@ package pl.michaelskyf.openfaker.xposed
 import android.util.Log
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
@@ -23,6 +22,7 @@ class HookTest {
     @Test
     fun `handleLoadPackage() class not found`() {
 
+        // Prepare
         val param = this.javaClass.classLoader?.let { LoadPackageParam("unit.test.class", it) }
             ?: fail("Failed to get the classLoader (Should never happen)")
 
@@ -30,11 +30,16 @@ class HookTest {
         val arguments: Array<TypeValuePair> = arrayOf( Pair(String::class.java, null) )
         val methodFakeValueArgsPair: MethodFakeValueArgsPair = Pair("Fake value", arguments)
         val map = mutableMapOf(Pair(classMethodPair, methodFakeValueArgsPair))
-        val hookHelper = mockk<HookHelper>()
-        val hook = Hook(hookHelper, map)
 
+        val hookHelper = mockk<HookHelper>()
+        every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns null
+
+        // Run
+        val hook = Hook(hookHelper, map)
         hook.handleLoadPackage(param)
 
-        verify(exactly = 1) { hookHelper.findAndHookMethod(any(), any(), any(), any(), any()) }
+        // Check
+        verify(exactly = 1) { hookHelper.findMethod(any(), any(), any(), *anyVararg()) }
+        verify(exactly = 0) { hookHelper.hookMethod(any(), any()) }
     }
 }

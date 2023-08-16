@@ -1,9 +1,7 @@
 package pl.michaelskyf.openfaker.xposed
 
-import android.util.Log
 import de.robv.android.xposed.XC_MethodHook
 import pl.michaelskyf.openfaker.BuildConfig
-import java.lang.Exception
 
 class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<ClassMethodPair, MethodFakeValueArgsPair>) {
 
@@ -14,8 +12,6 @@ class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<C
             return
         }
 
-        Log.i("New app", param.packageName)
-
         for ((key, value) in functionInfoMap)
         {
             val className = key.first
@@ -23,12 +19,10 @@ class Hook(private val hookHelper: HookHelper, val functionInfoMap: MutableMap<C
 
             val argumentTypes = value.second.map { it.first }.toTypedArray()
 
-            try {
-                hookHelper.findAndHookMethod(className, param.classLoader, methodName, MethodHookHandler(), *argumentTypes)
-            } catch (exception: Exception) {
-                Log.e("Failed to hook", "$className.$methodName(): $exception")
-            }
+            val method = hookHelper.findMethod(className, param.classLoader, methodName, *argumentTypes)
+                ?: continue
 
+            hookHelper.hookMethod(method, MethodHookHandler())
         }
     }
 
