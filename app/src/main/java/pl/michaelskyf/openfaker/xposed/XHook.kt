@@ -12,20 +12,14 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 
 typealias ClassMethodPair = Pair<String, String>
-typealias TypeValuePair = Pair<Class<*>, *>
+typealias TypeValuePair = Pair<Class<*>, Any?>
 typealias MethodFakeValueArgsPair = Pair<Any, Array<TypeValuePair>>
 
-data class MethodArguments(
 
-    val className: String,
-    val methodName: String,
-    val fakeValue: Any,
-    val typeValuePairArray: Array<TypeValuePair>
-)
 
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    private var hook = Hook(XHookHelper(), mapOf())
+    private lateinit var hook: Hook
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
@@ -38,21 +32,13 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         XposedBridge.log("OpenFaker: Initializing")
 
-        val newMap = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
-
         val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID, PrefsListener().prefName)
 
         val json = preferences.getString("xposed_method_args", null)
             ?: return
 
-        val argumentArray = Gson().fromJson(json, Array<MethodArguments>::class.java)
-            ?: return
+        val map = JsonToMap().getMapFromJson(json) ?: mapOf()
 
-        for (arg in argumentArray) {
-
-            newMap[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, arg.typeValuePairArray)
-        }
-
-        hook = Hook(XHookHelper(), newMap)
+        hook = Hook(XHookHelper(), map)
     }
 }

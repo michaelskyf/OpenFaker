@@ -10,7 +10,7 @@ class XHookHelper : HookHelper() {
         className: String,
         classLoader: ClassLoader,
         methodName: String,
-        vararg parameterTypes: Class<*>
+        vararg parameterTypes: Any
     ): Member? {
 
         return XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes)
