@@ -1,6 +1,7 @@
 package pl.michaelskyf.openfaker.xposed
 
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 

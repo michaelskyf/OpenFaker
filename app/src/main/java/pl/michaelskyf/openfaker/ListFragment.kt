@@ -1,6 +1,7 @@
 package pl.michaelskyf.openfaker
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.os.Bundle
 import android.provider.Settings.Secure
 import androidx.fragment.app.Fragment
@@ -9,10 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
+import pl.michaelskyf.openfaker.xposed.JsonToMap
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
 class ListFragment : Fragment() {
 
     private var _binding: FragmentListBinding? = null
@@ -36,9 +35,12 @@ class ListFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("HardwareIds")
     private fun createProperties(): List<Property> = buildList {
+        val arguments = JsonToMap.MethodArguments(Secure::class.java.name, "getString",
+            "Fake value", arrayOf( Pair(ContentResolver::class.java.name, null), Pair(String::class.java.name, "android_id") ))
 
+        this.add(Property(resources.getDrawable(android.R.drawable.ic_secure, null), "Android ID",
+            { Secure.getString(context?.contentResolver, Secure.ANDROID_ID) }, arguments, false))
     }
 
     override fun onDestroyView() {

@@ -1,7 +1,10 @@
 package pl.michaelskyf.openfaker
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +14,9 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import pl.michaelskyf.openfaker.databinding.OptionRowBinding
+import pl.michaelskyf.openfaker.xposed.PrefsListener
 
 class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder>()
 {
@@ -39,18 +44,26 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
         holder.icon.foreground = properties[position].icon
         holder.name.text = properties[position].name
         holder.realValue.text = properties[position].getRealValue()
-        holder.fakeValue.text = properties[position].fakeValue
+        holder.fakeValue.text = properties[position].data.fakeValue.toString()
         holder.isActive.isChecked = properties[position].isActive
 
         val switchCallback = {
-            _: CompoundButton, isChecked: Boolean ->
+            button: CompoundButton, isChecked: Boolean ->
             val value = when (isChecked)
             {
                 true -> holder.fakeValue.text
                 false -> holder.realValue.text
             }
 
-            holder.currentValue.text = value
+            Log.d(BuildConfig.APPLICATION_ID, button.isChecked.toString())
+            if (updatedCallback(button.context))
+            {
+                holder.currentValue.text = value
+
+            } else {
+
+                button.isChecked = !isChecked
+            }
         }
 
         holder.isActive.setOnCheckedChangeListener(switchCallback)
@@ -82,5 +95,24 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
         clipboard?.setPrimaryClip(clip)
         Snackbar.make(view, "Copied to clipboard", Snackbar.LENGTH_LONG).show()
 
+    }
+
+    @SuppressLint("ApplySharedPref")
+    private fun updatedCallback(context: Context): Boolean {
+
+        val pref = try {
+            context.getSharedPreferences(PrefsListener().prefName, Context.MODE_WORLD_READABLE)
+        } catch (e: SecurityException) {
+            return false
+        } ?: return false
+
+        val gson = Gson()
+        val mappedProperties = properties.map { it.data }
+        val json = gson.toJson(mappedProperties)
+            ?: return false
+
+        pref.edit().putString("xposed_method_args", json).commit()
+
+        return PrefsListener().reload()
     }
 }
