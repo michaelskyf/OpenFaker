@@ -28,7 +28,7 @@ class JsonToMapTest {
 
         //Check
         val returnedMethodArguments = map[Pair(className, methodName)] ?: fail("Map doesn't contain the value")
-        val mappedArguments = returnedMethodArguments.second.map { Pair(it.first.typeName, it.second) }.toTypedArray()
+        val mappedArguments = returnedMethodArguments.second.map { Pair(it.getType().typeName, it.expectedArgument) }.toTypedArray()
         assert(returnedMethodArguments.first == methodArguments.fakeValue)
         assert(mappedArguments.contentEquals(methodArguments.typeValuePairArray))
     }

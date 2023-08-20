@@ -28,7 +28,7 @@ class JsonToMap {
 
             try {
                 val convertedArray =
-                    arg.typeValuePairArray.map { Pair(Class.forName(it.first), it.second) }
+                    arg.typeValuePairArray.map { ExpectedFunctionArgument(Class.forName(it.first) as Class<Any>, it.second) }
                         .toTypedArray()
                 map[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, convertedArray)
             } catch (exception: ClassNotFoundException) {

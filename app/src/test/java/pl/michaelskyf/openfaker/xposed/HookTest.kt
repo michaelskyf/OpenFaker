@@ -49,7 +49,7 @@ class HookTest {
         val loadPackageParameter = LoadPackageParam("com.some.package", javaClass.classLoader ?: fail("Failed to get classLoader"))
 
         val methodNameToArgumentsMap = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
-        methodNameToArgumentsMap[Pair("some.class", "someMethod")] = Pair("Fake value", arrayOf( Pair( String::class.java, null ) ))
+        methodNameToArgumentsMap[Pair("some.class", "someMethod")] = Pair("Fake value", arrayOf( ExpectedFunctionArgument(String(), ExpectedFunctionArgument.CompareOperation.AlwaysTrue)))
 
         val hookHelper = mockk<HookHelper>()
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns null
@@ -69,7 +69,7 @@ class HookTest {
         val loadPackageParameter = LoadPackageParam("com.some.package", javaClass.classLoader ?: fail("Failed to get classLoader"))
 
         val methodNameToArgumentsMap = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
-        methodNameToArgumentsMap[Pair("some.class", "someMethod")] = Pair("Fake value", arrayOf( Pair( String::class.java, null ) ))
+        methodNameToArgumentsMap[Pair("some.class", "someMethod")] = Pair("Fake value", arrayOf( ExpectedFunctionArgument(String(), ExpectedFunctionArgument.CompareOperation.AlwaysTrue)))
 
         val hookHelper = mockk<HookHelper>(relaxed = true)
         val testClass = TestClass()
@@ -84,4 +84,20 @@ class HookTest {
         // Check
         verify(exactly = 1) { hookHelper.hookMethod(any(), any()) }
     }
+
+    /*class MethodHookHandlerTest {
+        @Test
+        fun `shouldModifyFunctionValue() should return true when all expectedArguments are null`() {
+
+            // Prepare
+            val methodHookHandler = Hook(mockk<HookHelper>(relaxed = true), mapOf()).MethodHookHandler()
+            val realFunctionArguments = arrayOf("Some", "Important", "Arguments")
+            val expectedFunctionArguments
+
+            // Run
+            val result = methodHookHandler.shouldModifyFunctionValue()
+
+            // Assert
+        }
+    }*/
 }

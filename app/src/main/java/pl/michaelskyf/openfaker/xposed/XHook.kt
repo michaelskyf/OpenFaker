@@ -15,8 +15,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 
 typealias ClassMethodPair = Pair<String, String>
-typealias TypeValuePair = Pair<Class<*>, Any?>
-typealias MethodFakeValueArgsPair = Pair<Any, Array<TypeValuePair>>
+typealias MethodFakeValueArgsPair = Pair<Any, Array<ExpectedFunctionArgument<Any>>>
 
 
 
@@ -45,7 +44,6 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
-    // TODO: move json code to its own class
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam?) {
 
         XposedBridge.log("OpenFaker: Initializing")
