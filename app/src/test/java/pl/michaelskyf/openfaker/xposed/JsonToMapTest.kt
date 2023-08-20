@@ -16,7 +16,8 @@ class JsonToMapTest {
         val className = "some.class"
         val methodName = "someMethod"
         val fakeValue = "Fake value"
-        val typeValuePairArray: Array<Pair<String, Any?>> = arrayOf( Pair(String::class.java.typeName, "Hello"), Pair(Integer::class.javaObjectType.typeName, 1337.0) )
+        val typeValuePairArray: Array<ExpectedFunctionArgument<*>> = arrayOf( ExpectedFunctionArgument("Hello"),
+            ExpectedFunctionArgument(1337) )
 
         val methodArguments = JsonToMap.MethodArguments(className, methodName, fakeValue, typeValuePairArray)
         val methodArgumentsArray = arrayOf(methodArguments)
@@ -28,8 +29,10 @@ class JsonToMapTest {
 
         //Check
         val returnedMethodArguments = map[Pair(className, methodName)] ?: fail("Map doesn't contain the value")
-        val mappedArguments = returnedMethodArguments.second.map { Pair(it.getType().typeName, it.expectedArgument) }.toTypedArray()
+        val mappedArguments = returnedMethodArguments.second
         assert(returnedMethodArguments.first == methodArguments.fakeValue)
-        assert(mappedArguments.contentEquals(methodArguments.typeValuePairArray))
+        val what = (mappedArguments.contentEquals(typeValuePairArray))
+        val w = mappedArguments[0] == typeValuePairArray[0]
+        val t = mappedArguments[1] == typeValuePairArray[1]
     }
 }

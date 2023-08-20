@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
+import pl.michaelskyf.openfaker.xposed.ExpectedFunctionArgument
 import pl.michaelskyf.openfaker.xposed.JsonToMap
 
 class ListFragment : Fragment() {
@@ -36,8 +37,10 @@ class ListFragment : Fragment() {
     }
 
     private fun createProperties(): List<Property> = buildList {
+
         val arguments = JsonToMap.MethodArguments(Secure::class.java.name, "getString",
-            "Fake value", arrayOf( Pair(ContentResolver::class.java.name, null), Pair(String::class.java.name, "android_id") ))
+            "Fake value", arrayOf( ExpectedFunctionArgument(ContentResolver::class.java, null),
+                ExpectedFunctionArgument(String::class.java, "android_id") ))
 
         this.add(Property(resources.getDrawable(android.R.drawable.ic_secure, null), "Android ID",
             { Secure.getString(context?.contentResolver, Secure.ANDROID_ID) }, arguments, false))

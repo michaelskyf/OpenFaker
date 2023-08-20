@@ -1,17 +1,17 @@
 package pl.michaelskyf.openfaker.xposed
 
-class ExpectedFunctionArgument<T>(val classType: Class<T>, val expectedArgument: T?, val compareOperation: CompareOperation) {
+class ExpectedFunctionArgument<T> private constructor(private val classType: Class<Any>, val expectedArgument: T?, val compareOperation: CompareOperation) {
 
     companion object {
         inline operator fun <reified T> invoke(expectedArgument: T?, compareOperation: CompareOperation = CompareOperation.Equal)
             = ExpectedFunctionArgument(T::class.java, expectedArgument, compareOperation)
 
-        operator fun invoke(classType: Class<Any>, expectedArgument: Any?, compareOperation: CompareOperation = CompareOperation.Equal)
-                = ExpectedFunctionArgument(classType, expectedArgument, compareOperation)
+        operator fun <T> invoke(classType: Class<T>, expectedArgument: T?, compareOperation: CompareOperation = CompareOperation.Equal)
+                = ExpectedFunctionArgument(classType as Class<Any>, expectedArgument, compareOperation)
     }
     enum class CompareOperation {
         Equal,
-        NotEqual,
+        Unequal,
         LessThanExpected,
         AlwaysTrue
     }
@@ -19,7 +19,7 @@ class ExpectedFunctionArgument<T>(val classType: Class<T>, val expectedArgument:
 
         return when (compareOperation) {
             CompareOperation.Equal -> functionArgument == expectedArgument
-            CompareOperation.NotEqual -> functionArgument != expectedArgument
+            CompareOperation.Unequal -> functionArgument != expectedArgument
             CompareOperation.LessThanExpected -> compareTo(functionArgument)?.let { it < 0 } ?: false
             CompareOperation.AlwaysTrue -> true
         }
@@ -45,7 +45,13 @@ class ExpectedFunctionArgument<T>(val classType: Class<T>, val expectedArgument:
         }
     }
 
-    fun getType(): Class<T> {
+    fun getType(): Class<*> {
         return classType
     }
+
+    override fun equals(other: Any?)
+        = (other is ExpectedFunctionArgument<*>)
+            && this.classType == other.classType
+            && this.expectedArgument == other.expectedArgument
+            && this.compareOperation == other.compareOperation
 }

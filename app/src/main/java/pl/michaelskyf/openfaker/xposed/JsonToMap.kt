@@ -27,10 +27,12 @@ class JsonToMap {
         for (arg in argumentArray) {
 
             try {
-                val convertedArray =
-                    arg.typeValuePairArray.map { ExpectedFunctionArgument(Class.forName(it.first) as Class<Any>, it.second) }
-                        .toTypedArray()
-                map[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, convertedArray)
+                val mappedArray = arg.typeValuePairArray.map {
+                    val foundClass = Class.forName(it.first) ?: throw ClassNotFoundException()
+                    ExpectedFunctionArgument(foundClass as Class<Any>, it.second, it.third)
+                }.toTypedArray()
+
+                map[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, mappedArray)
             } catch (exception: ClassNotFoundException) {
                 return null
             }
@@ -38,13 +40,25 @@ class JsonToMap {
 
         return map
     }
-    data class MethodArguments(
+    class MethodArguments(
 
         val className: String,
         val methodName: String,
         val fakeValue: Any,
-        val typeValuePairArray: Array<Pair<String, Any?>>
+        val typeValuePairArray: Array<Triple<String, Any?, ExpectedFunctionArgument.CompareOperation>>
     ) {
+        companion object {
+            operator fun invoke(className: String,
+                       methodName: String,
+                       fakeValue: Any,
+                       typeValuePairArray: Array<ExpectedFunctionArgument<*>>
+            ): MethodArguments {
+
+                val mappedArguments = typeValuePairArray.map { Triple(it.getType().typeName, it.expectedArgument, it.compareOperation) }.toTypedArray()
+                return MethodArguments(className, methodName, fakeValue, mappedArguments)
+            }
+        }
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false

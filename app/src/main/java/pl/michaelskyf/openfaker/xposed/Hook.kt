@@ -14,7 +14,7 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
             val className = key.first
             val methodName = key.second
 
-            val argumentTypes = value.second
+            val argumentTypes = value.second.map { it.getType().typeName }.toTypedArray()
 
             val method = try {
                 hookHelper.findMethod(className, param.classLoader, methodName, *argumentTypes)
@@ -50,6 +50,7 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
 
                 if (!expectedArgument.matches(realArgument))
                 {
+                    XposedBridge.log("Dont modify")
                     return false
                 }
             }
