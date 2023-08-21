@@ -1,14 +1,19 @@
 package pl.michaelskyf.openfaker.module
 
+import android.os.Build
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
 
-class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPair, MethodFakeValueArgsPair>) {
+class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPair, MethodFakeValueArgsPair>, val logger: Logger) {
 
     fun handleLoadPackage(param: LoadPackageParam) {
+        hookMethods(param)
+    }
+
+    private fun hookMethods(param: LoadPackageParam) {
 
         for ((key, value) in methodArgs)
         {
@@ -19,17 +24,16 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
 
             val method = try {
                 hookHelper.findMethod(className, param.classLoader, methodName, *argumentTypes)
-                    ?: continue
             } catch (e: NoSuchMethodException) {
-                XposedBridge.log(BuildConfig.APPLICATION_ID + " $e")
-                continue
-            }
+                null
+            } ?: continue
 
             hookHelper.hookMethod(method, MethodHookHandler())
+            logger.log("Hooked $className.$methodName()")
         }
     }
 
-    // TODO: Check if beforeHookedMethod can be executed concurrently (MutableMap may not be compatible)
+    // TODO: Check if beforeHookedMethod can be executed concurrently (Map may not be compatible)
     inner class MethodHookHandler {
 
         fun beforeHookedMethod(hookParameters: XC_MethodHook.MethodHookParam) {

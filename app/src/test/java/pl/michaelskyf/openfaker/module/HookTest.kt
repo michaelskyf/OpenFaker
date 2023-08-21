@@ -38,13 +38,6 @@ class HookTest {
         }
     }
 
-    @BeforeEach
-    fun beforeEach() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } returns 0
-        every { Log.i(any(), any()) } returns 0
-    }
-
     @Test
     fun `handleLoadPackage() class not found`() {
 
@@ -58,7 +51,7 @@ class HookTest {
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns null
 
         // Run
-        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap())
+        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap(), mockk<Logger>(relaxed = true))
         hook.handleLoadPackage(loadPackageParameter)
 
         // Check
@@ -81,7 +74,7 @@ class HookTest {
         } returns (getMethodSafe(testClass::class.java, "testFunction", String::class.java) ?: fail("Failed to get method"))
 
         // Run
-        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap())
+        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap(), mockk<Logger>(relaxed = true))
         hook.handleLoadPackage(loadPackageParameter)
 
         // Check

@@ -2,6 +2,7 @@ package pl.michaelskyf.openfaker.ui
 
 import android.R
 import android.content.ContentResolver
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.Secure
 import androidx.fragment.app.Fragment

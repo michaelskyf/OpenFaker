@@ -21,7 +21,7 @@ typealias MethodFakeValueArgsPair = Pair<Any, Array<ExpectedFunctionArgument>>
 
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    private val hook = Hook(XHookHelper(), mapOf())
+    private val hook = Hook(XHookHelper(), mapOf(), XLogger())
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
