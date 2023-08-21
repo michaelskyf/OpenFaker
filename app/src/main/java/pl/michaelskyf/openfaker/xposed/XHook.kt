@@ -15,7 +15,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 
 typealias ClassMethodPair = Pair<String, String>
-typealias MethodFakeValueArgsPair = Pair<Any, Array<ExpectedFunctionArgument<Any>>>
+typealias MethodFakeValueArgsPair = Pair<Any, Array<ExpectedFunctionArgument>>
 
 
 

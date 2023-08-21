@@ -42,7 +42,7 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
             }
         }
 
-        fun shouldModifyFunctionValue(realFunctionArguments: Array<Any>, expectedArguments: Array<ExpectedFunctionArgument<Any>>): Boolean {
+        fun shouldModifyFunctionValue(realFunctionArguments: Array<Any>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
 
             for ((argumentIndex, expectedArgument) in expectedArguments.withIndex())
             {

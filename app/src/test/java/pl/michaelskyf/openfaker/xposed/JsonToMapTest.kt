@@ -12,11 +12,11 @@ class JsonToMapTest {
     @Test
     fun `getMapFromJson() from MethodArguments`() {
 
-        // Setup
+        // Assemble
         val className = "some.class"
         val methodName = "someMethod"
         val fakeValue = "Fake value"
-        val typeValuePairArray: Array<ExpectedFunctionArgument<*>> = arrayOf( ExpectedFunctionArgument("Hello"),
+        val typeValuePairArray: Array<ExpectedFunctionArgument> = arrayOf( ExpectedFunctionArgument("Hello"),
             ExpectedFunctionArgument(1337) )
 
         val methodArguments = JsonToMap.MethodArguments(className, methodName, fakeValue, typeValuePairArray)
@@ -27,12 +27,10 @@ class JsonToMapTest {
         // Run
         val map = JsonToMap().getMapFromJson(json) ?: fail("Failed to get map from json")
 
-        //Check
+        // Assert
         val returnedMethodArguments = map[Pair(className, methodName)] ?: fail("Map doesn't contain the value")
         val mappedArguments = returnedMethodArguments.second
         assert(returnedMethodArguments.first == methodArguments.fakeValue)
-        val what = (mappedArguments.contentEquals(typeValuePairArray))
-        val w = mappedArguments[0] == typeValuePairArray[0]
-        val t = mappedArguments[1] == typeValuePairArray[1]
+        assert(mappedArguments.contentEquals(typeValuePairArray))
     }
 }

@@ -1,13 +1,19 @@
 package pl.michaelskyf.openfaker.xposed
 
-class ExpectedFunctionArgument<T> private constructor(private val classType: Class<Any>, val expectedArgument: T?, val compareOperation: CompareOperation) {
+import java.lang.Exception
+import kotlin.math.exp
+
+class ExpectedFunctionArgument (val classType: Class<*>, val expectedArgument: Any?, val compareOperation: CompareOperation = CompareOperation.Equal) {
+
+    init {
+        if (classType != expectedArgument?.javaClass) {
+            throw Exception("Types $classType and " + expectedArgument?.javaClass + " do not match") // TODO: something meaningful
+        }
+    }
 
     companion object {
         inline operator fun <reified T> invoke(expectedArgument: T?, compareOperation: CompareOperation = CompareOperation.Equal)
             = ExpectedFunctionArgument(T::class.java, expectedArgument, compareOperation)
-
-        operator fun <T> invoke(classType: Class<T>, expectedArgument: T?, compareOperation: CompareOperation = CompareOperation.Equal)
-                = ExpectedFunctionArgument(classType as Class<Any>, expectedArgument, compareOperation)
     }
     enum class CompareOperation {
         Equal,
@@ -50,8 +56,15 @@ class ExpectedFunctionArgument<T> private constructor(private val classType: Cla
     }
 
     override fun equals(other: Any?)
-        = (other is ExpectedFunctionArgument<*>)
+        = (other is ExpectedFunctionArgument)
             && this.classType == other.classType
             && this.expectedArgument == other.expectedArgument
             && this.compareOperation == other.compareOperation
+
+    override fun hashCode(): Int {
+        var result = classType.hashCode()
+        result = 31 * result + (expectedArgument?.hashCode() ?: 0)
+        result = 31 * result + compareOperation.hashCode()
+        return result
+    }
 }

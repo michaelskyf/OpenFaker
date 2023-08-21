@@ -29,7 +29,14 @@ class JsonToMap {
             try {
                 val mappedArray = arg.typeValuePairArray.map {
                     val foundClass = Class.forName(it.first) ?: throw ClassNotFoundException()
-                    ExpectedFunctionArgument(foundClass as Class<Any>, it.second, it.third)
+                    var expectedValue = it.second
+
+                    if (expectedValue != null && expectedValue.javaClass == java.lang.Double::class.java && foundClass == Integer::class.java) {
+                        val double = expectedValue as Double
+                        expectedValue = double.toInt()
+                    }
+
+                    ExpectedFunctionArgument(foundClass, expectedValue, it.third)
                 }.toTypedArray()
 
                 map[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, mappedArray)
@@ -51,7 +58,7 @@ class JsonToMap {
             operator fun invoke(className: String,
                        methodName: String,
                        fakeValue: Any,
-                       typeValuePairArray: Array<ExpectedFunctionArgument<*>>
+                       typeValuePairArray: Array<ExpectedFunctionArgument>
             ): MethodArguments {
 
                 val mappedArguments = typeValuePairArray.map { Triple(it.getType().typeName, it.expectedArgument, it.compareOperation) }.toTypedArray()

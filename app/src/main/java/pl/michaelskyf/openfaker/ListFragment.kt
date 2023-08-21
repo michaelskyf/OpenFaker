@@ -39,7 +39,7 @@ class ListFragment : Fragment() {
     private fun createProperties(): List<Property> = buildList {
 
         val arguments = JsonToMap.MethodArguments(Secure::class.java.name, "getString",
-            "Fake value", arrayOf( ExpectedFunctionArgument(ContentResolver::class.java, null),
+            "Fake value", arrayOf( ExpectedFunctionArgument(ContentResolver::class.java, null, ExpectedFunctionArgument.CompareOperation.AlwaysTrue),
                 ExpectedFunctionArgument(String::class.java, "android_id") ))
 
         this.add(Property(resources.getDrawable(android.R.drawable.ic_secure, null), "Android ID",
