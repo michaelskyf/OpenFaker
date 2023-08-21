@@ -29,7 +29,7 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
         }
     }
 
-    // TODO: Check if beforeHookedMethod is executed concurrently (MutableMap may not be compatible)
+    // TODO: Check if beforeHookedMethod can be executed concurrently (MutableMap may not be compatible)
     inner class MethodHookHandler {
 
         fun beforeHookedMethod(hookParameters: XC_MethodHook.MethodHookParam) {
@@ -43,7 +43,7 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
             }
         }
 
-        fun shouldModifyFunctionValue(realFunctionArguments: Array<Any>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
+        fun shouldModifyFunctionValue(realFunctionArguments: Array<Any?>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
 
             for ((argumentIndex, expectedArgument) in expectedArguments.withIndex())
             {
@@ -51,7 +51,6 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
 
                 if (!expectedArgument.matches(realArgument))
                 {
-                    XposedBridge.log("Dont modify")
                     return false
                 }
             }

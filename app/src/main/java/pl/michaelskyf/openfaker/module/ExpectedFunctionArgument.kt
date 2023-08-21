@@ -4,21 +4,22 @@ import java.lang.Exception
 
 class ExpectedFunctionArgument (val classType: Class<*>, val expectedArgument: Any?, val compareOperation: CompareOperation = CompareOperation.Equal) {
 
+    enum class CompareOperation {
+        Equal,
+        Unequal,
+        LessThanExpected,
+        AlwaysTrue
+    }
+
     init {
-        if (classType != expectedArgument?.javaClass) {
-            throw Exception("Types $classType and " + expectedArgument?.javaClass + " do not match") // TODO: something meaningful
+        if (compareOperation != CompareOperation.AlwaysTrue && expectedArgument != null && classType != expectedArgument.javaClass) {
+            throw Exception("Types $classType and " + expectedArgument.javaClass + " do not match") // TODO: Custom exception?
         }
     }
 
     companion object {
         inline operator fun <reified T> invoke(expectedArgument: T?, compareOperation: CompareOperation = CompareOperation.Equal)
             = ExpectedFunctionArgument(T::class.java, expectedArgument, compareOperation)
-    }
-    enum class CompareOperation {
-        Equal,
-        Unequal,
-        LessThanExpected,
-        AlwaysTrue
     }
     inline fun <reified AT> matches(functionArgument: AT?): Boolean {
 
