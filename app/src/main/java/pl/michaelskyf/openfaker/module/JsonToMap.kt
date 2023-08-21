@@ -56,26 +56,6 @@ class JsonToMap {
             }
         }
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
 
-            other as MethodArguments
-
-            if (className != other.className) return false
-            if (methodName != other.methodName) return false
-            if (fakeValue != other.fakeValue) return false
-            if (!typeValuePairArray.contentEquals(other.typeValuePairArray)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = className.hashCode()
-            result = 31 * result + methodName.hashCode()
-            result = 31 * result + fakeValue.hashCode()
-            result = 31 * result + typeValuePairArray.contentHashCode()
-            return result
-        }
     }
 }
