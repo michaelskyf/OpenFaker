@@ -33,6 +33,42 @@ class ExpectedFunctionArgumentTest {
     }
 
     @Test
+    fun `objects with the same type but different value should have different hash and should not be equal`() {
+        val first = ExpectedFunctionArgument(String::class.java, "Test")
+        val second = ExpectedFunctionArgument(String::class.java, "Test2")
+
+        assert(first != second)
+        assert(first.hashCode() != second.hashCode())
+    }
+
+    @Test
+    fun `objects with the same value but different types should have different hash and should not be equal`() {
+        val first = ExpectedFunctionArgument(String::class.java, null)
+        val second = ExpectedFunctionArgument(Integer::class.java, null)
+
+        assert(first != second)
+        assert(first.hashCode() != second.hashCode())
+    }
+
+    @Test
+    fun `objects with the same value and same types should have the same hash and should be equal`() {
+        val first = ExpectedFunctionArgument(String::class.java, "Hello")
+        val second = ExpectedFunctionArgument(String::class.java, "Hello")
+
+        assert(first == second)
+        assert(first.hashCode() == second.hashCode())
+    }
+
+    @Test
+    fun `objects with the same value and same types, but different compare operator should have different hash and should not be equal`() {
+        val first = ExpectedFunctionArgument(String::class.java, "Hello", ExpectedFunctionArgument.CompareOperation.Equal)
+        val second = ExpectedFunctionArgument(String::class.java, "Hello", ExpectedFunctionArgument.CompareOperation.AlwaysTrue)
+
+        assert(first != second)
+        assert(first.hashCode() != second.hashCode())
+    }
+
+    @Test
     fun `matches(String, Equal) should return true when comparing two equal objects`() {
 
         // Assemble

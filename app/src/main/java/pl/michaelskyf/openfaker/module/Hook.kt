@@ -6,8 +6,13 @@ import de.robv.android.xposed.XposedBridge
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
+import java.lang.reflect.Method
 
-class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPair, MethodFakeValueArgsPair>, val logger: Logger) {
+class Hook(
+    private val hookHelper: HookHelper,
+    var methodArgs: Map<ClassMethodPair, MethodFakeValueArgsPair>,
+    private val logger: Logger
+    ) {
 
     fun handleLoadPackage(param: LoadPackageParam) {
         hookMethods(param)
@@ -33,18 +38,18 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
     // TODO: Check if beforeHookedMethod can be executed concurrently (Map may not be compatible)
     inner class MethodHookHandler {
 
-        fun beforeHookedMethod(hookParameters: XC_MethodHook.MethodHookParam) {
+        fun beforeHookedMethod(hookParameters: MethodHookParameters) {
 
             val expectedFunctionData = methodArgs[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]
                 ?: return
 
-            if(shouldModifyFunctionValue(hookParameters.args, expectedFunctionData.second)) {
+            if(shouldModifyFunctionValue(hookParameters.arguments, expectedFunctionData.second)) {
 
                 hookParameters.result = expectedFunctionData.first
             }
         }
 
-        private fun shouldModifyFunctionValue(realFunctionArguments: Array<Any?>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
+        private fun shouldModifyFunctionValue(realFunctionArguments: Array<*>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
 
             for ((argumentIndex, expectedArgument) in expectedArguments.withIndex())
             {

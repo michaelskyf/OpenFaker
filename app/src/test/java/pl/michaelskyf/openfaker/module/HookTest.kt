@@ -3,6 +3,7 @@ package pl.michaelskyf.openfaker.module
 import android.util.Log
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
@@ -15,6 +16,7 @@ import pl.michaelskyf.openfaker.module.HookHelper
 import pl.michaelskyf.openfaker.module.LoadPackageParam
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
+import java.lang.reflect.Member
 import java.lang.reflect.Method
 
 class HookTest {
@@ -51,7 +53,7 @@ class HookTest {
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns null
 
         // Run
-        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap(), mockk<Logger>(relaxed = true))
+        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap(), mockk(relaxed = true))
         hook.handleLoadPackage(loadPackageParameter)
 
         // Check
@@ -74,26 +76,66 @@ class HookTest {
         } returns (getMethodSafe(testClass::class.java, "testFunction", String::class.java) ?: fail("Failed to get method"))
 
         // Run
-        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap(), mockk<Logger>(relaxed = true))
+        val hook = Hook(hookHelper, methodNameToArgumentsMap.toMutableMap(), mockk(relaxed = true))
         hook.handleLoadPackage(loadPackageParameter)
 
         // Check
         verify(exactly = 1) { hookHelper.hookMethod(any(), any()) }
     }
 
-    /*class MethodHookHandlerTest {
-        @Test
-        fun `shouldModifyFunctionValue() should return true when all expectedArguments are null`() {
+    class MethodHookHandlerTest {
 
-            // Prepare
-            val methodHookHandler = Hook(mockk<HookHelper>(relaxed = true), mapOf()).MethodHookHandler()
-            val realFunctionArguments = arrayOf("Some", "Important", "Arguments")
-            val expectedFunctionArguments
+        class TestHookParameters(method: Member, arguments: Array<*>) : MethodHookParameters(method, arguments) {
+            override var result: Any?
+                get() = null
+                set(value) {}
+        }
+        @Test
+        fun `beforeHookedMethod() should set the result when all expected arguments match function arguments`() {
+
+            // Assemble
+            val fakeValue = "Fake Value"
+            val arguments = arrayOf( "Argument" )
+            val map = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
+            val method = TestClass::class.java.methods.first()
+            map[Pair(method.declaringClass.name, method.name)] = Pair(fakeValue, arrayOf(
+                ExpectedFunctionArgument(arguments[0]) ))
+
+            val hook = Hook(mockk(relaxed = true), map, mockk(relaxed = true))
+            val methodHookHandler = hook.MethodHookHandler()
+
+            mockkConstructor(TestHookParameters::class)
+            val mockedParameters = TestHookParameters(method, arguments)
 
             // Run
-            val result = methodHookHandler.shouldModifyFunctionValue()
+            methodHookHandler.beforeHookedMethod(mockedParameters)
 
             // Assert
+            verify(exactly = 1) { mockedParameters.result = fakeValue }
         }
-    }*/
+
+        @Test
+        fun `beforeHookedMethod() should not set the result when expected arguments differ from function arguments`() {
+
+            // Assemble
+            val fakeValue = "Fake Value"
+            val arguments = arrayOf( "Argument" )
+            val map = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
+            val method = TestClass::class.java.methods.first()
+            map[Pair(method.declaringClass.name, method.name)] = Pair(fakeValue, arrayOf(
+                ExpectedFunctionArgument("Different argument") ))
+
+            val hook = Hook(mockk(relaxed = true), map, mockk(relaxed = true))
+            val methodHookHandler = hook.MethodHookHandler()
+
+            mockkConstructor(TestHookParameters::class)
+            val mockedParameters = TestHookParameters(method, arguments)
+
+            // Run
+            methodHookHandler.beforeHookedMethod(mockedParameters)
+
+            // Assert
+            verify(exactly = 0) { mockedParameters.result = fakeValue }
+        }
+    }
 }

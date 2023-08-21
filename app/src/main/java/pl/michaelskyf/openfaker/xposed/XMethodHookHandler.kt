@@ -6,6 +6,6 @@ import pl.michaelskyf.openfaker.module.Hook
 class XMethodHookHandler(private val methodHookHandler: Hook.MethodHookHandler): XC_MethodHook() {
     override fun beforeHookedMethod(param: MethodHookParam) {
 
-        methodHookHandler.beforeHookedMethod(param)
+        methodHookHandler.beforeHookedMethod(XMethodHookParameters(param))
     }
 }
