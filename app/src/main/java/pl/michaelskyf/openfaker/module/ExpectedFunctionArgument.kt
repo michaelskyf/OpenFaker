@@ -8,6 +8,9 @@ class ExpectedFunctionArgument (val classType: Class<*>, val expectedArgument: A
         Equal,
         Unequal,
         LessThanExpected,
+        LessEqualExpected,
+        GreaterThanExpected,
+        GreaterEqualExpected,
         AlwaysTrue
     }
 
@@ -27,6 +30,9 @@ class ExpectedFunctionArgument (val classType: Class<*>, val expectedArgument: A
             CompareOperation.Equal -> functionArgument == expectedArgument
             CompareOperation.Unequal -> functionArgument != expectedArgument
             CompareOperation.LessThanExpected -> compareTo(functionArgument)?.let { it < 0 } ?: false
+            CompareOperation.LessEqualExpected -> compareTo(functionArgument)?.let { it <= 0 } ?: false
+            CompareOperation.GreaterThanExpected -> compareTo(functionArgument)?.let { it > 0 } ?: false
+            CompareOperation.GreaterEqualExpected -> compareTo(functionArgument)?.let { it >= 0 } ?: false
             CompareOperation.AlwaysTrue -> true
         }
     }
@@ -55,16 +61,23 @@ class ExpectedFunctionArgument (val classType: Class<*>, val expectedArgument: A
         return classType
     }
 
-    override fun equals(other: Any?)
-        = (other is ExpectedFunctionArgument)
-            && this.classType == other.classType
-            && this.expectedArgument == other.expectedArgument
-            && this.compareOperation == other.compareOperation
-
     override fun hashCode(): Int {
         var result = classType.hashCode()
         result = 31 * result + (expectedArgument?.hashCode() ?: 0)
         result = 31 * result + compareOperation.hashCode()
         return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ExpectedFunctionArgument
+
+        if (classType != other.classType) return false
+        if (expectedArgument != other.expectedArgument) return false
+        if (compareOperation != other.compareOperation) return false
+
+        return true
     }
 }

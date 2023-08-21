@@ -22,11 +22,8 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
 
             val argumentTypes = value.second.map { it.getType().typeName }.toTypedArray()
 
-            val method = try {
-                hookHelper.findMethod(className, param.classLoader, methodName, *argumentTypes)
-            } catch (e: NoSuchMethodException) {
-                null
-            } ?: continue
+            val method = hookHelper.findMethod(className, param.classLoader, methodName, *argumentTypes)
+                ?: continue
 
             hookHelper.hookMethod(method, MethodHookHandler())
             logger.log("Hooked $className.$methodName()")
@@ -47,7 +44,7 @@ class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPa
             }
         }
 
-        fun shouldModifyFunctionValue(realFunctionArguments: Array<Any?>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
+        private fun shouldModifyFunctionValue(realFunctionArguments: Array<Any?>, expectedArguments: Array<ExpectedFunctionArgument>): Boolean {
 
             for ((argumentIndex, expectedArgument) in expectedArguments.withIndex())
             {
