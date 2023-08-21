@@ -2,7 +2,6 @@ package pl.michaelskyf.openfaker.ui
 
 import android.R
 import android.content.ContentResolver
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.Secure
 import androidx.fragment.app.Fragment
@@ -12,7 +11,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
 import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
-import pl.michaelskyf.openfaker.module.JsonToMap
+import pl.michaelskyf.openfaker.module.MethodArguments
 
 class ListFragment : Fragment() {
 
@@ -39,7 +38,7 @@ class ListFragment : Fragment() {
 
     private fun createProperties(): List<Property> = buildList {
 
-        val arguments = JsonToMap.MethodArguments(Secure::class.java.name, "getString",
+        val arguments = MethodArguments(Secure::class.java.name, "getString",
             "Fake value", arrayOf( ExpectedFunctionArgument(ContentResolver::class.java, null, ExpectedFunctionArgument.CompareOperation.AlwaysTrue),
                 ExpectedFunctionArgument(String::class.java, "android_id") ))
 

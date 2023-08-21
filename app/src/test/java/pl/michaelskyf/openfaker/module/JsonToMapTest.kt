@@ -18,7 +18,7 @@ class JsonToMapTest {
             ExpectedFunctionArgument(1337), ExpectedFunctionArgument(String::class.java,null),
             ExpectedFunctionArgument(13.37), ExpectedFunctionArgument(1337.0))
 
-        val methodArguments = JsonToMap.MethodArguments(className, methodName, fakeValue, expectedArguments)
+        val methodArguments = MethodArguments(className, methodName, fakeValue, expectedArguments)
         val methodArgumentsArray = arrayOf(methodArguments)
 
         val json = Gson().toJson(methodArgumentsArray)

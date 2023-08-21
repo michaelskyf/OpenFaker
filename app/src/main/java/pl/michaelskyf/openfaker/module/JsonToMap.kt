@@ -9,53 +9,44 @@ class JsonToMap {
 
     fun getMapFromJson(json: String): Map<ClassMethodPair, MethodFakeValueArgsPair>? {
 
-        val map = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
-
         val argumentArray = Gson().fromJson(json, Array<MethodArguments>::class.java)
             ?: return null
 
+        val map = mutableMapOf<ClassMethodPair, MethodFakeValueArgsPair>()
+
         for (arg in argumentArray) {
 
-            try {
-                val mappedArray = arg.typeValuePairArray.map {
-                    val foundClass = Class.forName(it.first) ?: throw ClassNotFoundException()
-                    var expectedValue = it.second
+            val mappedArray = arg.typeValuePairArray.map {
+                val foundClass = getClassForName(it.first) ?: return null
 
-                    if (expectedValue != null && expectedValue.javaClass == java.lang.Double::class.java && foundClass == Integer::class.java) {
-                        val double = expectedValue as Double
-                        expectedValue = double.toInt()
-                    }
+                val expectedValue = convertDoubleToIntIfTheTypeIsCorrect(it.second, foundClass)
 
-                    ExpectedFunctionArgument(foundClass, expectedValue, it.third)
-                }.toTypedArray()
+                ExpectedFunctionArgument(foundClass, expectedValue, it.third)
+            }.toTypedArray()
 
-                map[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, mappedArray)
-            } catch (exception: ClassNotFoundException) {
-                return null
-            }
+            map[Pair(arg.className, arg.methodName)] = Pair(arg.fakeValue, mappedArray)
         }
 
         return map
     }
-    class MethodArguments(
 
-        val className: String,
-        val methodName: String,
-        val fakeValue: Any,
-        val typeValuePairArray: Array<Triple<String, Any?, ExpectedFunctionArgument.CompareOperation>>
-    ) {
-        companion object {
-            operator fun invoke(className: String,
-                       methodName: String,
-                       fakeValue: Any,
-                       typeValuePairArray: Array<ExpectedFunctionArgument>
-            ): MethodArguments {
+    // This function exists because Gson by default converts integers to doubles
+    private fun convertDoubleToIntIfTheTypeIsCorrect(value: Any?, clazz: Class<*>): Any? {
 
-                val mappedArguments = typeValuePairArray.map { Triple(it.getType().typeName, it.expectedArgument, it.compareOperation) }.toTypedArray()
-                return MethodArguments(className, methodName, fakeValue, mappedArguments)
-            }
+        if (value == null) return null
+
+        if (value.javaClass == java.lang.Double::class.java && clazz == Integer::class.java) {
+            return (value as Double).toInt()
         }
 
+        return value
+    }
 
+    private fun getClassForName(className: String): Class<*>? {
+        return try {
+            Class.forName(className)
+        } catch (exception: Exception) {
+            null
+        }
     }
 }

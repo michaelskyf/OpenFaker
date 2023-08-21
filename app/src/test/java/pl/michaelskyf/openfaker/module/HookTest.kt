@@ -1,19 +1,12 @@
 package pl.michaelskyf.openfaker.module
 
-import android.util.Log
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
-import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Test
-import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
-import pl.michaelskyf.openfaker.module.Hook
-import pl.michaelskyf.openfaker.module.HookHelper
-import pl.michaelskyf.openfaker.module.LoadPackageParam
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
 import java.lang.reflect.Member
