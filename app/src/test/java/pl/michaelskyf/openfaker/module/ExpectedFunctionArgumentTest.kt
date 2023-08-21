@@ -2,7 +2,6 @@ package pl.michaelskyf.openfaker.module
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
 
 class ExpectedFunctionArgumentTest {
 
@@ -159,7 +158,7 @@ class ExpectedFunctionArgumentTest {
     }
 
     @Test
-    fun `matches(String, LessThanExpected) should return false when function value is greater than expected value`(){
+    fun `matches(String, LessThanExpected) should return false when function value is greater than the expected value`(){
 
         // Assemble
         val expectedString = "Hello"
@@ -186,5 +185,155 @@ class ExpectedFunctionArgumentTest {
 
         // Assert
         assert(!result)
+    }
+
+    @Test
+    fun `matches(String, LessEqualExpected) should return true when function value is smaller than the expected value`(){
+
+        // Assemble
+        val expectedString = "HelloLonger"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.LessEqualExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(result)
+    }
+
+    @Test
+    fun `matches(String, LessEqualExpected) should return true when function value is equal the expected value`(){
+
+        // Assemble
+        val expectedString = "Hello"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.LessEqualExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(result)
+    }
+
+    @Test
+    fun `matches(String, LessEqualExpected) should return false when function value is greater than the expected value`(){
+
+        // Assemble
+        val expectedString = "Hello"
+        val functionString = "HelloLonger"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.LessEqualExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(!result)
+    }
+
+    @Test
+    fun `matches(String, GreaterThanExpected) should return true when function value is greater than the expected value`(){
+
+        // Assemble
+        val expectedString = "Hello"
+        val functionString = "HelloLonger"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.GreaterThanExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(result)
+    }
+
+    @Test
+    fun `matches(String, GreaterThanExpected) should return false when function value is equal the expected value`(){
+
+        // Assemble
+        val expectedString = "Hello"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.GreaterThanExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(!result)
+    }
+
+    @Test
+    fun `matches(String, GreaterThanExpected) should return false when function value is smaller than the expected value`(){
+
+        // Assemble
+        val expectedString = "HelloLonger"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.GreaterThanExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(!result)
+    }
+
+    @Test
+    fun `matches(String, GreaterEqualExpected) should return true when function value is greater than the expected value`(){
+
+        // Assemble
+        val expectedString = "Hello"
+        val functionString = "HelloLonger"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.GreaterEqualExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(result)
+    }
+
+    @Test
+    fun `matches(String, GreaterEqualExpected) should return true when function value is equal the expected value`(){
+
+        // Assemble
+        val expectedString = "Hello"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.GreaterEqualExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(result)
+    }
+
+    @Test
+    fun `matches(String, GreaterEqualExpected) should return false when function value is less than the expected value`(){
+
+        // Assemble
+        val expectedString = "HelloLonger"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.GreaterEqualExpected)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(!result)
+    }
+
+    @Test
+    fun `matches(String, AlwaysTrue) should always return true`(){
+
+        // Assemble
+        val expectedString = "HelloLonger"
+        val functionString = "Hello"
+        val expectedFunctionArgument = ExpectedFunctionArgument(expectedString, ExpectedFunctionArgument.CompareOperation.AlwaysTrue)
+
+        // Run
+        val result = expectedFunctionArgument.matches(functionString)
+
+        // Assert
+        assert(result)
     }
 }
