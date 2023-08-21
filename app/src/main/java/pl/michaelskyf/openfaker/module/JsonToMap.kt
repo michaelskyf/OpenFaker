@@ -1,18 +1,8 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
 import com.google.gson.Gson
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
-import com.google.gson.TypeAdapter
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonToken
-import com.google.gson.stream.JsonWriter
-import de.robv.android.xposed.XSharedPreferences
-import pl.michaelskyf.openfaker.BuildConfig
-import java.lang.reflect.Type
+import pl.michaelskyf.openfaker.xposed.ClassMethodPair
+import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
 
 
 class JsonToMap {

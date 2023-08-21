@@ -1,10 +1,5 @@
 package pl.michaelskyf.openfaker.xposed
 
-import android.content.ContentResolver
-import android.util.Log
-import com.google.gson.Gson
-import com.google.gson.JsonParser
-import com.google.gson.JsonSyntaxException
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XC_MethodHook
@@ -13,6 +8,11 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
+import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
+import pl.michaelskyf.openfaker.module.Hook
+import pl.michaelskyf.openfaker.module.JsonToMap
+import pl.michaelskyf.openfaker.module.LoadPackageParam
+import pl.michaelskyf.openfaker.module.PrefsListener
 
 typealias ClassMethodPair = Pair<String, String>
 typealias MethodFakeValueArgsPair = Pair<Any, Array<ExpectedFunctionArgument>>
@@ -29,7 +29,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID)
         {
-            val method = XposedHelpers.findMethodExact("pl.michaelskyf.openfaker.xposed.PrefsListener", lpparam.classLoader, "reload")
+            val method = XposedHelpers.findMethodExact("pl.michaelskyf.openfaker.module.PrefsListener", lpparam.classLoader, "reload")
             if (method == null)
             {
                 XposedBridge.log("OpenFaker: Failed to hook PrefsListener!")

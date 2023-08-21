@@ -1,5 +1,6 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
+import pl.michaelskyf.openfaker.module.Hook
 import java.lang.reflect.Member
 
 abstract class HookHelper {

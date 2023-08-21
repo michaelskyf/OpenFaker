@@ -2,6 +2,8 @@ package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
+import pl.michaelskyf.openfaker.module.Hook
+import pl.michaelskyf.openfaker.module.HookHelper
 import java.lang.reflect.Member
 
 class XHookHelper : HookHelper() {

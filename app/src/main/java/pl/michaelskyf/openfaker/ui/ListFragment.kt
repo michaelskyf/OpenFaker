@@ -1,6 +1,6 @@
-package pl.michaelskyf.openfaker
+package pl.michaelskyf.openfaker.ui
 
-import android.annotation.SuppressLint
+import android.R
 import android.content.ContentResolver
 import android.os.Bundle
 import android.provider.Settings.Secure
@@ -10,8 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
-import pl.michaelskyf.openfaker.xposed.ExpectedFunctionArgument
-import pl.michaelskyf.openfaker.xposed.JsonToMap
+import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
+import pl.michaelskyf.openfaker.module.JsonToMap
 
 class ListFragment : Fragment() {
 
@@ -42,8 +42,10 @@ class ListFragment : Fragment() {
             "Fake value", arrayOf( ExpectedFunctionArgument(ContentResolver::class.java, null, ExpectedFunctionArgument.CompareOperation.AlwaysTrue),
                 ExpectedFunctionArgument(String::class.java, "android_id") ))
 
-        this.add(Property(resources.getDrawable(android.R.drawable.ic_secure, null), "Android ID",
-            { Secure.getString(context?.contentResolver, Secure.ANDROID_ID) }, arguments, false))
+        this.add(
+            Property(resources.getDrawable(R.drawable.ic_secure, null), "Android ID",
+            { Secure.getString(context?.contentResolver, Secure.ANDROID_ID) }, arguments, false)
+        )
     }
 
     override fun onDestroyView() {

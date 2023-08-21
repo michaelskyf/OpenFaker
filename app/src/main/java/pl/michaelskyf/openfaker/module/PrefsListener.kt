@@ -1,4 +1,4 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
 class PrefsListener {
 

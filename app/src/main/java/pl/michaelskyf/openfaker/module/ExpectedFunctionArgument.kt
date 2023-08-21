@@ -1,7 +1,6 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
 import java.lang.Exception
-import kotlin.math.exp
 
 class ExpectedFunctionArgument (val classType: Class<*>, val expectedArgument: Any?, val compareOperation: CompareOperation = CompareOperation.Equal) {
 

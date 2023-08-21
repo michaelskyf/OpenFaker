@@ -1,9 +1,10 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
-import android.util.Log
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import pl.michaelskyf.openfaker.BuildConfig
+import pl.michaelskyf.openfaker.xposed.ClassMethodPair
+import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
 
 class Hook(private val hookHelper: HookHelper, var methodArgs: Map<ClassMethodPair, MethodFakeValueArgsPair>) {
 

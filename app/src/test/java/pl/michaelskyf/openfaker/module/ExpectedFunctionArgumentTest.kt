@@ -1,8 +1,7 @@
-package pl.michaelskyf.openfaker.xposed
-
-import org.junit.jupiter.api.Assertions.*
+package pl.michaelskyf.openfaker.module
 
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
 
 class ExpectedFunctionArgumentTest {
 

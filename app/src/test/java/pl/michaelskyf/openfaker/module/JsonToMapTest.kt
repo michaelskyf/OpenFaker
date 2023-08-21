@@ -1,11 +1,11 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
 import com.google.gson.Gson
-import com.google.gson.JsonParser
-import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
+import pl.michaelskyf.openfaker.module.JsonToMap
 
 class JsonToMapTest {
 

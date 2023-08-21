@@ -1,17 +1,20 @@
-package pl.michaelskyf.openfaker.xposed
+package pl.michaelskyf.openfaker.module
 
 import android.util.Log
-import de.robv.android.xposed.XC_MethodHook
-import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
+import pl.michaelskyf.openfaker.module.Hook
+import pl.michaelskyf.openfaker.module.HookHelper
+import pl.michaelskyf.openfaker.module.LoadPackageParam
+import pl.michaelskyf.openfaker.xposed.ClassMethodPair
+import pl.michaelskyf.openfaker.xposed.MethodFakeValueArgsPair
 import java.lang.reflect.Method
 
 class HookTest {

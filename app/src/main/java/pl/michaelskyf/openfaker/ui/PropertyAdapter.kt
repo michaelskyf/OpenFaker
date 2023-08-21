@@ -1,4 +1,4 @@
-package pl.michaelskyf.openfaker
+package pl.michaelskyf.openfaker.ui
 
 import android.annotation.SuppressLint
 import android.content.ClipData
@@ -15,8 +15,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.databinding.OptionRowBinding
-import pl.michaelskyf.openfaker.xposed.PrefsListener
+import pl.michaelskyf.openfaker.module.PrefsListener
 
 class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder>()
 {
