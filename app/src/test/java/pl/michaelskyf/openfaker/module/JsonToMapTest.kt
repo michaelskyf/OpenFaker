@@ -35,4 +35,31 @@ class JsonToMapTest {
         assert(returnedMethodArguments.first == methodArguments.fakeValue)
         assert(mappedArguments.contentEquals(expectedArguments))
     }
+
+    @Test
+    fun `getMapFromJson() should return null if it cannot find a class`() {
+
+        // Assemble
+        val nonExistantClassName = "this.class.should.never.ever.exist.in.this.project"
+
+        val json = """
+            [{
+                "className":"some.class",
+                "methodName":"someMethod",
+                "fakeValue":"Fake value",
+                "typeValuePairArray":[
+                    {"first":"$nonExistantClassName","second":"Hello","third":"Equal"},
+                    {"first":"java.lang.Integer","second":1337,"third":"Equal"},
+                    {"first":"java.lang.String","third":"Equal"},
+                    {"first":"java.lang.Double","second":13.37,"third":"Equal"},
+                    {"first":"java.lang.Double","second":1337.0,"third":"Equal"}
+                ]
+            }]""".trimMargin()
+
+        // Run
+        val map = JsonToMap().getMapFromJson(json)
+
+        // Assert
+        assert(map == null)
+    }
 }
