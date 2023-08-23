@@ -8,14 +8,11 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
-import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
 import pl.michaelskyf.openfaker.module.Hook
-import pl.michaelskyf.openfaker.module.JsonToMap
 import pl.michaelskyf.openfaker.module.LoadPackageParam
 import pl.michaelskyf.openfaker.module.PrefsListener
 
 typealias ClassMethodPair = Pair<String, String>
-typealias MethodFakeValueArgsPair = Pair<Any, Array<ExpectedFunctionArgument>>
 
 
 
@@ -52,11 +49,6 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         val json = preferences.getString("xposed_method_args", null)
             ?: return
-
-        val map = JsonToMap().getMapFromJson(json)
-            ?: return
-
-        hook.methodArgs = map
     }
 
     inner class PreferenceCallback : XC_MethodHook() {
@@ -68,11 +60,6 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             val json = preferences.getString("xposed_method_args", null)
                 ?: return
-
-            val map = JsonToMap().getMapFromJson(json) ?: return
-
-            hook.methodArgs = map
-            param?.result = true
         }
     }
 }

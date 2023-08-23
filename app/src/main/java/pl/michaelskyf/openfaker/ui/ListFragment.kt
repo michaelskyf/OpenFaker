@@ -10,8 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
-import pl.michaelskyf.openfaker.module.ExpectedFunctionArgument
-import pl.michaelskyf.openfaker.module.MethodArguments
 
 class ListFragment : Fragment() {
 
@@ -38,14 +36,6 @@ class ListFragment : Fragment() {
 
     private fun createProperties(): List<Property> = buildList {
 
-        val arguments = MethodArguments(Secure::class.java.name, "getString",
-            "Fake value", arrayOf( ExpectedFunctionArgument(ContentResolver::class.java, null, ExpectedFunctionArgument.CompareOperation.AlwaysTrue),
-                ExpectedFunctionArgument(String::class.java, "android_id") ))
-
-        this.add(
-            Property(resources.getDrawable(R.drawable.ic_secure, null), "Android ID",
-            { Secure.getString(context?.contentResolver, Secure.ANDROID_ID) }, arguments, false)
-        )
     }
 
     override fun onDestroyView() {
