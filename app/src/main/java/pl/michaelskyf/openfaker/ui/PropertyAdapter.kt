@@ -45,7 +45,7 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
         holder.icon.foreground = properties[position].icon
         holder.name.text = properties[position].name
         holder.realValue.text = properties[position].getRealValue()
-        holder.fakeValue.text = properties[position].data.fakeValue.toString()
+        holder.fakeValue.text = "TODO"
         holder.isActive.isChecked = properties[position].isActive
 
         val switchCallback = {
@@ -108,7 +108,7 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
         } ?: return false
 
         val gson = Gson()
-        val mappedProperties = properties.map { it.data }
+        val mappedProperties = properties.map { "TODO" }
         val json = gson.toJson(mappedProperties)
             ?: return false
 

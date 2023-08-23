@@ -56,6 +56,7 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.10.1")
     compileOnly("de.robv.android.xposed:api:82")
+    implementation("org.luaj:luaj-jse:3.0.1")
 }
 
 tasks.withType<Test>().configureEach {

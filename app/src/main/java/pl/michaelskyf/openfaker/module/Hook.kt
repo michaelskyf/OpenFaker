@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.module
 
+import pl.michaelskyf.openfaker.module.lua.LuaModuleRegistry
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 
 class Hook(
