@@ -34,19 +34,19 @@ function registerModule(moduleRegistry)
     --[[
         This example focuses on changing the Android ID returned by Settings$Secure.getString()
 
-        Both exactMatchArguments() and customMatchArguments() in this example work exactly the same.
+        Both exactMatchArguments() and customMatchArgument() in this example work exactly the same.
 
-        The only difference between the two is that customMatchArguments() is MUCH SLOWER than exactMatchArguments()
+        The only difference between the two is that customMatchArgument() is MUCH SLOWER than exactMatchArguments()
     --]]
     local contentResolver = argument:ignore()
     local name = argument:require("android_id")
     moduleRegistry:exactMatchArguments(contentResolver, name)
 
     --[[
-        WARNING! customMatchArguments() should be used only as a last resort.
+        WARNING! customMatchArgument() should be used only as a last resort.
         It is MUCH SLOWER than other look-up methods ( linear time at best ).
     --]]
-    moduleRegistry:customMatchArguments(matchArguments)
+    moduleRegistry:customMatchArgument(matchArguments)
 end
 
 --[[
