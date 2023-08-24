@@ -1,11 +1,12 @@
 package pl.michaelskyf.openfaker.module.lua
 
+import pl.michaelskyf.openfaker.module.FakerModule
 import java.util.PriorityQueue
 
 class ArgumentMatcher private constructor(
     private val match: MutableMap<Any?, ArgumentMatcher>,
     private var ignore: ArgumentMatcher?,
-    private val queue: PriorityQueue<LuaModule>
+    private val queue: PriorityQueue<FakerModule>
 ){
     companion object {
         operator fun invoke(): ArgumentMatcher {
@@ -13,7 +14,7 @@ class ArgumentMatcher private constructor(
         }
     }
 
-    fun match(arguments: Array<Any?>): PriorityQueue<LuaModule> {
+    fun match(arguments: Array<Any?>): PriorityQueue<FakerModule> {
         if (arguments.isEmpty()) return queue
 
         val resultMatch = match[arguments.first()]?.match(arguments.sliceArray(1 until arguments.size)) ?: PriorityQueue()
@@ -22,7 +23,7 @@ class ArgumentMatcher private constructor(
         return PriorityQueue(resultMatch + resultIgnore)
     }
 
-    fun add(arguments: Array<FunctionArgument>, module: LuaModule) {
+    fun add(arguments: Array<FunctionArgument>, module: FakerModule) {
         if (arguments.isEmpty())
         {
             queue.add(module)

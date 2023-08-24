@@ -1,28 +1,27 @@
 package pl.michaelskyf.openfaker.module.lua
 
 import org.luaj.vm2.lib.jse.CoerceJavaToLua
+import pl.michaelskyf.openfaker.module.FakerArgumentCheckerFunction
+import pl.michaelskyf.openfaker.module.FakerModule
 import java.util.PriorityQueue
 
 class LuaModuleRegistry {
 
     private val argumentMatcher = ArgumentMatcher()
-    private val argumentMatchingFunctions = PriorityQueue<ArgumentMatchingFunction>()
-    fun register(module: LuaModule) {
+    private val argumentMatchingFunctions = PriorityQueue<FakerArgumentCheckerFunction>()
+    fun register(module: FakerModule) {
     }
 
-    fun forEachMatchingModule(functionArguments: Array<Any?>, block: LuaModule.() -> Unit) {
+    fun forEachMatchingModule(functionArguments: Array<Any?>, block: FakerModule.() -> Unit) {
         val matchingArguments = argumentMatcher.match(functionArguments)
         val mergedPriorityQueues = matchingArguments + argumentMatchingFunctions
 
         for (element in mergedPriorityQueues) {
-            val module = if (element is ArgumentMatchingFunction) {
-                val isMatching = element.luaFunction.invoke(CoerceJavaToLua.coerce(functionArguments)).optboolean(0, false)
-                when (isMatching) {
-                    true -> element.module
-                    false -> continue
-                }
+            val module = if (element is FakerArgumentCheckerFunction) {
+                val result = element.call(*functionArguments)
+                result.getOrNull() ?: continue
             } else {
-                element as LuaModule
+                element as FakerModule
             }
 
             block(module)

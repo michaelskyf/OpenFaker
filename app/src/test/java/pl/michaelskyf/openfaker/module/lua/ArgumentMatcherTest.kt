@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.module.FakerModule
 
 class ArgumentMatcherTest {
 
@@ -13,8 +14,8 @@ class ArgumentMatcherTest {
 
     @Test
     fun `match() should return given item when arguments match`() {
-        val luaModule = mockk<LuaModule>()
-        every { luaModule.priority } returns 0
+        val fakerModule = mockk<FakerModule>()
+        every { fakerModule.priority } returns 0
         val argumentMatcher = ArgumentMatcher()
         val moduleArguments: Array<FunctionArgument> = arrayOf(
             FunctionArgument.ignore(),
@@ -23,7 +24,7 @@ class ArgumentMatcherTest {
             FunctionArgument.ignore()
         )
 
-        argumentMatcher.add(moduleArguments, luaModule)
+        argumentMatcher.add(moduleArguments, fakerModule)
 
         val queue = argumentMatcher.match(arrayOf(
             "Shouldn't match this",
@@ -32,13 +33,13 @@ class ArgumentMatcherTest {
             "Shouldn't match this"
         ))
 
-        assert(queue.first() === luaModule)
+        assert(queue.first() === fakerModule)
     }
 
     @Test
     fun `match() should not return given item when arguments don't match`() {
-        val luaModule = mockk<LuaModule>()
-        every { luaModule.priority } returns 0
+        val fakerModule = mockk<FakerModule>()
+        every { fakerModule.priority } returns 0
         val argumentMatcher = ArgumentMatcher()
         val moduleArguments: Array<FunctionArgument> = arrayOf(
             FunctionArgument.ignore(),
@@ -47,7 +48,7 @@ class ArgumentMatcherTest {
             FunctionArgument.require(null)
         )
 
-        argumentMatcher.add(moduleArguments, luaModule)
+        argumentMatcher.add(moduleArguments, fakerModule)
 
         val queue = argumentMatcher.match(arrayOf(
             "Shouldn't match this",
@@ -61,10 +62,10 @@ class ArgumentMatcherTest {
 
     @Test
     fun `match() should return multiple matching items`() {
-        val matchingLuaModule = mockk<LuaModule>(relaxed = true)
-        val notMatchingLuaModule = mockk<LuaModule>(relaxed = true)
-        every { matchingLuaModule.priority } returns 0
-        every { notMatchingLuaModule.priority } returns 0
+        val matchingFakerModule = mockk<FakerModule>(relaxed = true)
+        val notMatchingFakerModule = mockk<FakerModule>(relaxed = true)
+        every { matchingFakerModule.priority } returns 0
+        every { notMatchingFakerModule.priority } returns 0
         val argumentMatcher = ArgumentMatcher()
 
         val moduleArgumentsMatching: Array<Array<FunctionArgument>> = arrayOf(
@@ -104,11 +105,11 @@ class ArgumentMatcherTest {
         )
 
         moduleArgumentsMatching.forEach {
-            argumentMatcher.add(it, matchingLuaModule)
+            argumentMatcher.add(it, matchingFakerModule)
         }
 
         moduleArgumentsNotMatching.forEach {
-            argumentMatcher.add(it, notMatchingLuaModule)
+            argumentMatcher.add(it, notMatchingFakerModule)
         }
 
         val queue = argumentMatcher.match(arrayOf(
@@ -120,15 +121,15 @@ class ArgumentMatcherTest {
         ))
 
         queue.forEach {
-            assert(it === matchingLuaModule)
+            assert(it === matchingFakerModule)
         }
         assert(queue.size == moduleArgumentsMatching.size)
     }
 
     @Test
     fun `match() should match embedded FunctionArguments`() {
-        val luaModule = mockk<LuaModule>()
-        every { luaModule.priority } returns 0
+        val fakerModule = mockk<FakerModule>()
+        every { fakerModule.priority } returns 0
         val argumentMatcher = ArgumentMatcher()
         val moduleArguments: Array<FunctionArgument> = arrayOf(
             FunctionArgument.ignore(),
@@ -137,7 +138,7 @@ class ArgumentMatcherTest {
             FunctionArgument.require(FunctionArgument.require(FunctionArgument.ignore()))
         )
 
-        argumentMatcher.add(moduleArguments, luaModule)
+        argumentMatcher.add(moduleArguments, fakerModule)
 
         val queue = argumentMatcher.match(arrayOf(
             FunctionArgument.require("Hello"),
