@@ -6,6 +6,6 @@ import java.lang.Exception
 
 abstract class FakerModule(val priority: Int): Comparable<FakerModule> {
 
-    abstract fun run(hookParameters: MethodHookParameters): Result<Void>
+    abstract fun run(hookParameters: MethodHookParameters): Result<Boolean>
     abstract fun getMatchingArgumentsInfo(): MatchingArgumentsInfo
 }

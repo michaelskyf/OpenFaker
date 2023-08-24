@@ -4,7 +4,7 @@ import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 
 class Hook(
     private val hookHelper: HookHelper,
-    var luaRegistries: Map<ClassMethodPair, FakerModuleRegistry>, // TODO: Convert map to something thread-safe
+    var fakerRegistries: Map<ClassMethodPair, Pair<FakerModuleRegistry, FakerModuleRegistry>>, // TODO: Convert map to something thread-safe
     private val logger: Logger
     ) {
 
@@ -24,6 +24,10 @@ class Hook(
 
         fun afterHookedMethod(hookParameters: MethodHookParameters) {
 
+            val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.second
+                ?: return
+
+            moduleRegistry.getMatchingModules(hookParameters.arguments)
         }
     }
 }

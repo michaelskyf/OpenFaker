@@ -14,7 +14,7 @@ class ArgumentMatcher private constructor(
         }
     }
 
-    fun match(arguments: Array<Any?>): PriorityQueue<FakerModule> {
+    fun match(arguments: Array<*>): PriorityQueue<FakerModule> {
         if (arguments.isEmpty()) return queue
 
         val resultMatch = match[arguments.first()]?.match(arguments.sliceArray(1 until arguments.size)) ?: PriorityQueue()

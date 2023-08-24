@@ -2,20 +2,17 @@ package pl.michaelskyf.openfaker.module
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import pl.michaelskyf.openfaker.module.lua.ArgumentMatcher
 import pl.michaelskyf.openfaker.module.lua.FunctionArgument
 import pl.michaelskyf.openfaker.module.lua.MatchingArgumentsInfo
 
 class FakerModuleRegistryTest {
 
     @Test
-    fun `forEachMatchingModule() should pass all matching FakerModules`() {
+    fun `getMatchingModules() should return all matching FakerModules`() {
 
         val fakerModuleRegistry = FakerModuleRegistry()
-        val receivedMatchingModules = mutableListOf<FakerModule>()
         val argument = "Argument"
 
         val matchingModule = mockk<FakerModule>(relaxed = true)
@@ -37,13 +34,10 @@ class FakerModuleRegistryTest {
         fakerModuleRegistry.register(matchingModule)
         fakerModuleRegistry.register(notMatchingModule)
 
-        fakerModuleRegistry.forEachMatchingModule(arrayOf(argument)) {
-            receivedMatchingModules.add(this)
-        }
+        val matchingModules = fakerModuleRegistry.getMatchingModules(arrayOf(argument))
 
-        assert(receivedMatchingModules.isNotEmpty())
-        receivedMatchingModules.forEach {
-            if (it !== matchingModule) fail("Not matching module found!")
+        for (module in matchingModules) {
+            if (module !== matchingModule) fail("Got invalid module")
         }
     }
 }
