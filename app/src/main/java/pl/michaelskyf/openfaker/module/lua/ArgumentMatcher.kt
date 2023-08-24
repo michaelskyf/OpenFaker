@@ -23,7 +23,7 @@ class ArgumentMatcher private constructor(
         return PriorityQueue(resultMatch + resultIgnore)
     }
 
-    fun add(arguments: Array<FunctionArgument>, module: FakerModule) {
+    fun add(arguments: Array<out FunctionArgument>, module: FakerModule) {
         if (arguments.isEmpty())
         {
             queue.add(module)

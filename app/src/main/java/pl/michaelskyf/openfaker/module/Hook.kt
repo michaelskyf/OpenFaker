@@ -1,11 +1,10 @@
 package pl.michaelskyf.openfaker.module
 
-import pl.michaelskyf.openfaker.module.lua.LuaModuleRegistry
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 
 class Hook(
     private val hookHelper: HookHelper,
-    var luaRegistries: Map<ClassMethodPair, LuaModuleRegistry>, // TODO: Convert map to something thread-safe
+    var luaRegistries: Map<ClassMethodPair, FakerModuleRegistry>, // TODO: Convert map to something thread-safe
     private val logger: Logger
     ) {
 
