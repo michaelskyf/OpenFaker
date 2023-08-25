@@ -37,10 +37,12 @@ function registerModule(moduleRegistry)
         Both exactMatchArguments() and customMatchArgument() in this example work exactly the same.
 
         The only difference between the two is that customMatchArgument() is MUCH SLOWER than exactMatchArguments()
+
+		Note: exactMatchArguments() takes an array as argument --> {}
     --]]
     local contentResolver = argument:ignore()
     local name = argument:require("android_id")
-    moduleRegistry:exactMatchArguments(contentResolver, name)
+    moduleRegistry:exactMatchArguments({contentResolver, name})
 
     --[[
         WARNING! customMatchArgument() should be used only as a last resort.

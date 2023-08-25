@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import java.util.Optional
 
 class FakerModuleRegistryTest {
 
@@ -53,7 +54,7 @@ class FakerModuleRegistryTest {
 
         val matchingModule = mockk<FakerModule>()
         val matchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
-        every { matchingFunction.call(any()) } returns Result.success(matchingModule)
+        every { matchingFunction.call(any()) } returns Result.success(Optional.of(matchingModule))
         val matchingArgumentsInfo = TestMatchingArgumentsInfo()
         matchingArgumentsInfo.customArgumentMatchingFunctions.add(matchingFunction)
 
@@ -62,7 +63,7 @@ class FakerModuleRegistryTest {
 
         val notMatchingModule = mockk<FakerModule>()
         val notMatchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
-        every { notMatchingFunction.call(any()) } returns Result.success(null)
+        every { notMatchingFunction.call(any()) } returns Result.success(Optional.empty())
         val notMatchingArgumentsInfo = TestMatchingArgumentsInfo()
         notMatchingArgumentsInfo.customArgumentMatchingFunctions.add(notMatchingFunction)
 

@@ -54,12 +54,12 @@ class LuaFakerModule private constructor(
     }
 
     inner class LuaFakerArgumentCheckerFunction(private val luaFunction: LuaFunction) : FakerArgumentCheckerFunction() {
-        override fun call(vararg arguments: Any?): Result<FakerModule?> {
+        override fun call(vararg arguments: Any?): Result<Optional<FakerModule>> {
             return try {
                 val result = luaFunction.call(CoerceJavaToLua.coerce(arguments))
                 Result.success(when (result.checkboolean()) {
-                    true -> this@LuaFakerModule
-                    false -> null
+                    true -> Optional.of(this@LuaFakerModule)
+                    false -> Optional.empty()
                 })
             } catch (exception: Exception) {
                 Result.failure(exception)

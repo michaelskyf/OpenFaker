@@ -4,6 +4,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.module.FunctionArgument
 import pl.michaelskyf.openfaker.module.MethodHookParameters
 
 class LuaFakerModuleTest {
@@ -108,7 +109,7 @@ class LuaFakerModuleTest {
     }
 
     @Test
-    fun `run() should throw an exception when the result is not Boolean`() {
+    fun `run() should return failure when the result is not Boolean`() {
         val lua = """
             function registerModule(moduleRegistry)
             end
@@ -121,5 +122,167 @@ class LuaFakerModuleTest {
         val parameters = mockk<MethodHookParameters>()
 
         assert(module.getOrThrow().run(parameters).isFailure)
+    }
+
+    @Test
+    fun `getMatchingArgumentsInfo() should return failure when registerModule call throws an exception`() {
+        val lua = """
+            function registerModule(moduleRegistry)
+                moduleRegistry:thisMethodDoesNotExist()
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val result = module.getOrThrow().getMatchingArgumentsInfo()
+
+        assert(result.isFailure)
+    }
+
+    @Test
+    fun `getMatchingArgumentsInfo() should return failure when arguments given to exactMatchArguments() are not FunctionArgument(s)`() {
+        val lua = """
+            function registerModule(moduleRegistry)
+                moduleRegistry:exactMatchArguments("Not", "Function", "Arguments")
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val result = module.getOrThrow().getMatchingArgumentsInfo()
+
+        assert(result.isFailure)
+    }
+
+    @Test
+    fun `getMatchingArgumentsInfo() should return a single correct exact match`() {
+        val lua = """
+            function registerModule(moduleRegistry)
+                local first = argument:ignore()
+                local second = argument:require("Function")
+                local third = argument:require("Arguments")
+                moduleRegistry:exactMatchArguments({first, second, third})
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val result = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
+
+        assert(result.exactMatchArguments.size == 1)
+        assert(result.customArgumentMatchingFunctions.isEmpty())
+        val returnedExact = result.exactMatchArguments.first()
+        assert(returnedExact.contentEquals(arrayOf(
+           FunctionArgument.ignore(),
+            FunctionArgument.require("Function"),
+            FunctionArgument.require("Arguments")
+        )))
+    }
+
+    @Test
+    fun `getMatchingArgumentsInfo() should return all matchers set by the registerModule()`() {
+        val lua = """
+            function customMatcher()
+            end
+            
+            function registerModule(moduleRegistry)
+                moduleRegistry:exactMatchArguments({})
+                moduleRegistry:exactMatchArguments({argument:require("A"), argument:require("B")})
+                
+                moduleRegistry:customMatchArgument(customMatcher)
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val result = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
+        val exact = result.exactMatchArguments
+        val custom = result.customArgumentMatchingFunctions
+
+        assert(exact.size == 2)
+        assert(custom.size == 1)
+    }
+
+    @Test
+    fun `custom matcher call which takes no arguments should fail if it does not return bool`() {
+        val lua = """
+            function customMatcher()
+            end
+            
+            function registerModule(moduleRegistry)
+                moduleRegistry:customMatchArgument(customMatcher)
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val arguments = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
+        val custom = arguments.customArgumentMatchingFunctions.first()
+
+        val result = custom.call()
+        assert(result.isFailure)
+    }
+
+    @Test
+    fun `custom matcher should return a FakerModule if it returns true`() {
+        val lua = """
+            function customMatcher()
+                return true
+            end
+            
+            function registerModule(moduleRegistry)
+                moduleRegistry:customMatchArgument(customMatcher)
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val arguments = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
+        val custom = arguments.customArgumentMatchingFunctions.first()
+
+        val result = custom.call().getOrThrow()
+        assert(result.isPresent)
+    }
+
+    @Test
+    fun `custom matcher should return an empty option if it returns false`() {
+        val lua = """
+            function customMatcher()
+                return false
+            end
+            
+            function registerModule(moduleRegistry)
+                moduleRegistry:customMatchArgument(customMatcher)
+            end
+            
+            function runModule(hookParameters)
+                return true
+            end
+        """.trimIndent()
+        val module = LuaFakerModule(0, lua)
+
+        val arguments = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
+        val custom = arguments.customArgumentMatchingFunctions.first()
+
+        val result = custom.call().getOrThrow()
+        assert(!result.isPresent)
     }
 }

@@ -1,6 +1,7 @@
 package pl.michaelskyf.openfaker.module
 
 import java.util.PriorityQueue
+import kotlin.jvm.optionals.getOrNull
 
 class FakerModuleRegistry {
 
@@ -34,7 +35,7 @@ class FakerModuleRegistry {
                 val element = queueIterator.next()
 
                 nextModule = when(element) {
-                    is FakerModule.FakerArgumentCheckerFunction -> element.call(*hookedFunctionArguments).getOrNull() ?: continue
+                    is FakerModule.FakerArgumentCheckerFunction -> element.call(*hookedFunctionArguments).getOrNull()?.getOrNull() ?: continue
                     else -> element as FakerModule
                 }
 
