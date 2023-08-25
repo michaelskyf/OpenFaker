@@ -1,9 +1,11 @@
 package pl.michaelskyf.openfaker.module
 
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
+import java.lang.reflect.Method
 
 class Hook(
     private val hookHelper: HookHelper,
+    private var methodsToBeHooked: Set<Method>,
     var fakerRegistries: Map<ClassMethodPair, Pair<FakerModuleRegistry, FakerModuleRegistry>>, // TODO: Convert map to something thread-safe
     private val logger: Logger
     ) {
@@ -14,6 +16,9 @@ class Hook(
 
     private fun hookMethods(param: LoadPackageParam) {
 
+        for (method in methodsToBeHooked) {
+            hookHelper.hookMethod(method, MethodHookHandler())
+        }
     }
 
     inner class MethodHookHandler {

@@ -8,4 +8,9 @@ class XMethodHookHandler(private val methodHookHandler: Hook.MethodHookHandler):
 
         methodHookHandler.beforeHookedMethod(XMethodHookParameters(param))
     }
+
+    override fun afterHookedMethod(param: MethodHookParam) {
+
+        methodHookHandler.afterHookedMethod(XMethodHookParameters(param))
+    }
 }
