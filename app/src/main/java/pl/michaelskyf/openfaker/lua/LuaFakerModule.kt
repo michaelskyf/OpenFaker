@@ -5,6 +5,7 @@ import org.luaj.vm2.LuaFunction
 import org.luaj.vm2.lib.jse.CoerceJavaToLua
 import org.luaj.vm2.lib.jse.JsePlatform
 import pl.michaelskyf.openfaker.module.FakerModule
+import pl.michaelskyf.openfaker.module.FunctionArgument
 import pl.michaelskyf.openfaker.module.MatchingArgumentsInfo
 import pl.michaelskyf.openfaker.module.MethodHookParameters
 import java.util.Optional
@@ -20,8 +21,9 @@ class LuaFakerModule private constructor(
         operator fun invoke(priority: Int, luaSource: String): Result<FakerModule> {
             return try {
                 val globals = JsePlatform.standardGlobals()
-                globals.load(luaSource)
+                globals.load(luaSource).call()
 
+                globals.set("argument", CoerceJavaToLua.coerce(FunctionArgument::class.java))
                 val registerModule = globals.get("registerModule").checkfunction()
                 val runModule = globals.get("runModule").checkfunction()
 
