@@ -44,7 +44,7 @@ class LuaFakerModule private constructor(
     }
 
     override fun getMatchingArgumentsInfo(): Result<MatchingArgumentsInfo> {
-        val matchingArgumentsInfo = MatchingArgumentsInfo()
+        val matchingArgumentsInfo = LuaMatchingArgumentsInfo()
         return try {
             registerModule.call(CoerceJavaToLua.coerce(matchingArgumentsInfo))
             Result.success(matchingArgumentsInfo)
@@ -64,6 +64,16 @@ class LuaFakerModule private constructor(
             } catch (exception: Exception) {
                 Result.failure(exception)
             }
+        }
+    }
+
+    inner class LuaMatchingArgumentsInfo: MatchingArgumentsInfo() {
+        fun exactMatchArguments(vararg arguments: FunctionArgument) {
+            exactMatchArguments.add(arguments)
+        }
+
+        fun customMatchArgument(luaFunction: LuaFunction) {
+            customArgumentMatchingFunctions.add(LuaFakerArgumentCheckerFunction(luaFunction))
         }
     }
 }

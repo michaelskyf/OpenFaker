@@ -7,6 +7,8 @@ import org.junit.jupiter.api.fail
 
 class FakerModuleRegistryTest {
 
+    class TestMatchingArgumentsInfo: MatchingArgumentsInfo()
+
     @Test
     fun `getMatchingModules() should return all matching modules`() {
 
@@ -14,16 +16,16 @@ class FakerModuleRegistryTest {
         val argument = "Argument"
 
         val matchingModule = mockk<FakerModule>(relaxed = true)
-        val matchingArgumentsInfo = MatchingArgumentsInfo()
-        matchingArgumentsInfo.exactMatchArguments(
-            FunctionArgument.require("Argument")
+        val matchingArgumentsInfo = TestMatchingArgumentsInfo()
+        matchingArgumentsInfo.exactMatchArguments.add(
+            arrayOf(FunctionArgument.require("Argument"))
         )
         every { matchingModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
 
         val notMatchingModule = mockk<FakerModule>(relaxed = true)
-        val notMatchingArgumentsInfo = MatchingArgumentsInfo()
-        notMatchingArgumentsInfo.exactMatchArguments(
-            FunctionArgument.require("Should never match this string")
+        val notMatchingArgumentsInfo = TestMatchingArgumentsInfo()
+        notMatchingArgumentsInfo.exactMatchArguments.add(
+            arrayOf(FunctionArgument.require("Should never match this string"))
         )
         every { notMatchingModule.getMatchingArgumentsInfo() } returns Result.success(notMatchingArgumentsInfo)
 
@@ -52,8 +54,8 @@ class FakerModuleRegistryTest {
         val matchingModule = mockk<FakerModule>()
         val matchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
         every { matchingFunction.call(any()) } returns Result.success(matchingModule)
-        val matchingArgumentsInfo = MatchingArgumentsInfo()
-        matchingArgumentsInfo.customMatchArgument(matchingFunction)
+        val matchingArgumentsInfo = TestMatchingArgumentsInfo()
+        matchingArgumentsInfo.customArgumentMatchingFunctions.add(matchingFunction)
 
         every { matchingModule.priority } returns 1
         every { matchingModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
@@ -61,8 +63,8 @@ class FakerModuleRegistryTest {
         val notMatchingModule = mockk<FakerModule>()
         val notMatchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
         every { notMatchingFunction.call(any()) } returns Result.success(null)
-        val notMatchingArgumentsInfo = MatchingArgumentsInfo()
-        notMatchingArgumentsInfo.customMatchArgument(notMatchingFunction)
+        val notMatchingArgumentsInfo = TestMatchingArgumentsInfo()
+        notMatchingArgumentsInfo.customArgumentMatchingFunctions.add(notMatchingFunction)
 
         every { notMatchingModule.priority } returns 1
         every { notMatchingModule.getMatchingArgumentsInfo() } returns Result.success(notMatchingArgumentsInfo)
