@@ -2,8 +2,6 @@ package pl.michaelskyf.openfaker.module
 
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import pl.michaelskyf.openfaker.module.lua.FunctionArgument
-import pl.michaelskyf.openfaker.module.lua.MatchingArgumentsInfo
 
 class MatchingArgumentsInfoTest {
     @Test

@@ -1,6 +1,7 @@
-package pl.michaelskyf.openfaker.module.lua
+package pl.michaelskyf.openfaker.module
 
 import pl.michaelskyf.openfaker.module.FakerModule
+import pl.michaelskyf.openfaker.module.FunctionArgument
 
 class MatchingArgumentsInfo {
 

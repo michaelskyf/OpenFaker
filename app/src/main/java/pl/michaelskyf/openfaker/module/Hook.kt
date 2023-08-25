@@ -23,14 +23,7 @@ class Hook(
             val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.second
                 ?: return
 
-            val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
-
-            for (module in matchingModules) {
-                val result = module.run(hookParameters)
-                if (result.getOrDefault(false)) break
-
-                result.exceptionOrNull()?.let { logger.log(it.toString()) }
-            }
+            runModules(hookParameters, moduleRegistry)
         }
 
         fun afterHookedMethod(hookParameters: MethodHookParameters) {
@@ -38,6 +31,10 @@ class Hook(
             val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.second
                 ?: return
 
+            runModules(hookParameters, moduleRegistry)
+        }
+
+        private fun runModules(hookParameters: MethodHookParameters, moduleRegistry: FakerModuleRegistry) {
             val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
 
             for (module in matchingModules) {

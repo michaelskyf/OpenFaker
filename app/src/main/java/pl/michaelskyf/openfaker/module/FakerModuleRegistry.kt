@@ -1,21 +1,21 @@
 package pl.michaelskyf.openfaker.module
 
-import pl.michaelskyf.openfaker.module.lua.ArgumentMatcher
-import java.util.Comparator
 import java.util.PriorityQueue
 
 class FakerModuleRegistry {
 
     private val argumentMatcher = ArgumentMatcher()
     private val argumentMatchingFunctions = mutableListOf<FakerModule.FakerArgumentCheckerFunction>()
-    fun register(module: FakerModule) {
+    fun register(module: FakerModule): Result<Unit> {
 
-        val matchingArgumentsInfo = module.getMatchingArgumentsInfo()
+        val matchingArgumentsInfo = module.getMatchingArgumentsInfo().getOrElse { return Result.failure(it) }
         matchingArgumentsInfo.exactMatchArguments.forEach {
             argumentMatcher.add(it, module)
         }
 
         argumentMatchingFunctions.addAll(matchingArgumentsInfo.customArgumentMatchingFunctions)
+
+        return Result.success(Unit)
     }
 
     fun getMatchingModules(hookedFunctionArguments: Array<*>): MatchingModulesIterator {

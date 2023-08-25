@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import pl.michaelskyf.openfaker.module.lua.FunctionArgument
-import pl.michaelskyf.openfaker.module.lua.MatchingArgumentsInfo
 
 class FakerModuleRegistryTest {
 
@@ -20,14 +18,14 @@ class FakerModuleRegistryTest {
         matchingArgumentsInfo.exactMatchArguments(
             FunctionArgument.require("Argument")
         )
-        every { matchingModule.getMatchingArgumentsInfo() } returns matchingArgumentsInfo
+        every { matchingModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
 
         val notMatchingModule = mockk<FakerModule>(relaxed = true)
         val notMatchingArgumentsInfo = MatchingArgumentsInfo()
         notMatchingArgumentsInfo.exactMatchArguments(
             FunctionArgument.require("Should never match this string")
         )
-        every { notMatchingModule.getMatchingArgumentsInfo() } returns notMatchingArgumentsInfo
+        every { notMatchingModule.getMatchingArgumentsInfo() } returns Result.success(notMatchingArgumentsInfo)
 
         fakerModuleRegistry.register(matchingModule)
         fakerModuleRegistry.register(notMatchingModule)
@@ -58,7 +56,7 @@ class FakerModuleRegistryTest {
         matchingArgumentsInfo.customMatchArgument(matchingFunction)
 
         every { matchingModule.priority } returns 1
-        every { matchingModule.getMatchingArgumentsInfo() } returns matchingArgumentsInfo
+        every { matchingModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
 
         val notMatchingModule = mockk<FakerModule>()
         val notMatchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
@@ -67,7 +65,7 @@ class FakerModuleRegistryTest {
         notMatchingArgumentsInfo.customMatchArgument(notMatchingFunction)
 
         every { notMatchingModule.priority } returns 1
-        every { notMatchingModule.getMatchingArgumentsInfo() } returns notMatchingArgumentsInfo
+        every { notMatchingModule.getMatchingArgumentsInfo() } returns Result.success(notMatchingArgumentsInfo)
 
         fakerModuleRegistry.register(matchingModule)
         fakerModuleRegistry.register(notMatchingModule)

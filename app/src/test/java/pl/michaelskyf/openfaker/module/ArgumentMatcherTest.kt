@@ -1,10 +1,9 @@
-package pl.michaelskyf.openfaker.module.lua
+package pl.michaelskyf.openfaker.module
 
 import io.mockk.every
 import io.mockk.mockk
 
 import org.junit.jupiter.api.Test
-import pl.michaelskyf.openfaker.module.FakerModule
 
 class ArgumentMatcherTest {
 

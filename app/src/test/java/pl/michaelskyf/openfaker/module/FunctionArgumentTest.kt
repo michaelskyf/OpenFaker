@@ -1,8 +1,7 @@
-package pl.michaelskyf.openfaker.module.lua
-
-import org.junit.jupiter.api.Assertions.*
+package pl.michaelskyf.openfaker.module
 
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.module.FunctionArgument
 
 class FunctionArgumentTest {
 

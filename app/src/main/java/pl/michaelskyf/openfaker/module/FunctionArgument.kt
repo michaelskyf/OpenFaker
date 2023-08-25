@@ -1,4 +1,4 @@
-package pl.michaelskyf.openfaker.module.lua
+package pl.michaelskyf.openfaker.module
 class FunctionArgument private constructor(val value: Any?, val shouldIgnore: Boolean = false) {
 
     companion object {
