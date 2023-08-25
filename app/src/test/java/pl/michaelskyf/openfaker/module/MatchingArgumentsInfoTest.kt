@@ -25,7 +25,7 @@ class MatchingArgumentsInfoTest {
     @Test
     fun `customMatchArgument() should add custom comparison function only to the correct list`() {
         val matchingInfo = MatchingArgumentsInfo()
-        val customFunction = mockk<FakerArgumentCheckerFunction>(relaxed = true)
+        val customFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
         matchingInfo.customMatchArgument(customFunction)
 
         assert(matchingInfo.customArgumentMatchingFunctions.size == 1)

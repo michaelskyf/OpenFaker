@@ -1,12 +1,13 @@
 package pl.michaelskyf.openfaker.module
 
 import pl.michaelskyf.openfaker.module.lua.ArgumentMatcher
+import java.util.Comparator
 import java.util.PriorityQueue
 
 class FakerModuleRegistry {
 
     private val argumentMatcher = ArgumentMatcher()
-    private val argumentMatchingFunctions = PriorityQueue<FakerArgumentCheckerFunction>()
+    private val argumentMatchingFunctions = mutableListOf<FakerModule.FakerArgumentCheckerFunction>()
     fun register(module: FakerModule) {
 
         val matchingArgumentsInfo = module.getMatchingArgumentsInfo()
@@ -18,12 +19,12 @@ class FakerModuleRegistry {
     }
 
     fun getMatchingModules(hookedFunctionArguments: Array<*>): MatchingModulesIterator {
-        val matchingArguments = argumentMatcher.match(hookedFunctionArguments)
-        val mergedPriorityQueues = matchingArguments + argumentMatchingFunctions
+        val matchingArguments: List<Priority> = argumentMatcher.match(hookedFunctionArguments)
+        val mergedLists = matchingArguments + argumentMatchingFunctions
 
-        return MatchingModulesIterator(hookedFunctionArguments, mergedPriorityQueues)
+        return MatchingModulesIterator(hookedFunctionArguments, PriorityQueue(mergedLists))
     }
-    inner class MatchingModulesIterator(val hookedFunctionArguments: Array<*>, val mergedMatchers: List<Any>) : Iterator<FakerModule> {
+    inner class MatchingModulesIterator(val hookedFunctionArguments: Array<*>, val mergedMatchers: PriorityQueue<Priority>) : Iterator<FakerModule> {
 
         private val queueIterator = mergedMatchers.iterator()
         private lateinit var nextModule: FakerModule
@@ -33,7 +34,7 @@ class FakerModuleRegistry {
                 val element = queueIterator.next()
 
                 nextModule = when(element) {
-                    is FakerArgumentCheckerFunction -> element.call(*hookedFunctionArguments).getOrNull() ?: continue
+                    is FakerModule.FakerArgumentCheckerFunction -> element.call(*hookedFunctionArguments).getOrNull() ?: continue
                     else -> element as FakerModule
                 }
 

@@ -1,17 +1,16 @@
 package pl.michaelskyf.openfaker.module.lua
 
-import org.luaj.vm2.LuaFunction
-import pl.michaelskyf.openfaker.module.FakerArgumentCheckerFunction
+import pl.michaelskyf.openfaker.module.FakerModule
 
 class MatchingArgumentsInfo {
 
     val exactMatchArguments = mutableListOf<Array<out FunctionArgument>>()
-    val customArgumentMatchingFunctions = mutableListOf<FakerArgumentCheckerFunction>()
+    val customArgumentMatchingFunctions = mutableListOf<FakerModule.FakerArgumentCheckerFunction>()
     fun exactMatchArguments(vararg arguments: FunctionArgument) {
         exactMatchArguments.add(arguments)
     }
 
-    fun customMatchArgument(function: FakerArgumentCheckerFunction) {
+    fun customMatchArgument(function: FakerModule.FakerArgumentCheckerFunction) {
         customArgumentMatchingFunctions.add(function)
     }
 }

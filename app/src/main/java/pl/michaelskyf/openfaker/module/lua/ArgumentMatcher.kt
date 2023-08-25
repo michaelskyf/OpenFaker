@@ -1,32 +1,33 @@
 package pl.michaelskyf.openfaker.module.lua
 
+import kotlinx.coroutines.flow.merge
 import pl.michaelskyf.openfaker.module.FakerModule
 import java.util.PriorityQueue
 
 class ArgumentMatcher private constructor(
     private val match: MutableMap<Any?, ArgumentMatcher>,
     private var ignore: ArgumentMatcher?,
-    private val queue: PriorityQueue<FakerModule>
+    private val list: MutableList<FakerModule>
 ){
     companion object {
         operator fun invoke(): ArgumentMatcher {
-            return ArgumentMatcher(mutableMapOf(), null, PriorityQueue())
+            return ArgumentMatcher(mutableMapOf(), null, mutableListOf())
         }
     }
 
-    fun match(arguments: Array<*>): PriorityQueue<FakerModule> {
-        if (arguments.isEmpty()) return queue
+    fun match(arguments: Array<*>): List<FakerModule> {
+        if (arguments.isEmpty()) return list
 
-        val resultMatch = match[arguments.first()]?.match(arguments.sliceArray(1 until arguments.size)) ?: PriorityQueue()
-        val resultIgnore = ignore?.match(arguments.sliceArray(1 until arguments.size)) ?: PriorityQueue()
+        val resultMatch = match[arguments.first()]?.match(arguments.sliceArray(1 until arguments.size)) ?: listOf()
+        val resultIgnore = ignore?.match(arguments.sliceArray(1 until arguments.size)) ?: listOf()
 
-        return PriorityQueue(resultMatch + resultIgnore)
+        return resultMatch + resultIgnore
     }
 
     fun add(arguments: Array<out FunctionArgument>, module: FakerModule) {
         if (arguments.isEmpty())
         {
-            queue.add(module)
+            list.add(module)
             return
         }
 
