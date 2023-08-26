@@ -1,0 +1,9 @@
+{
+  "className": "android.provider.Settings$Secure",
+  "methodName": "getString",
+  "argumentTypes": [
+    "android.content.ContentResolver",
+    "java.lang.String"
+  ],
+  "luaScript": "==< Check 'examples/lua/Change_Android_ID.lua' >=="
+}
