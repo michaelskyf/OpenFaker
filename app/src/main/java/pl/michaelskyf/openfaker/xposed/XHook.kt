@@ -2,11 +2,10 @@ package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
-import pl.michaelskyf.openfaker.module.Hook
+import pl.michaelskyf.openfaker.module.MethodHook
 import pl.michaelskyf.openfaker.module.LoadPackageParam
 import pl.michaelskyf.openfaker.module.MethodHookHandler
 import pl.michaelskyf.openfaker.module.MethodHookParameters
@@ -19,7 +18,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private val hookHelper = XHookHelper()
     private val logger = XLogger()
     private val moduleData = XFakerData()
-    private val hook = Hook(hookHelper, logger)
+    private val methodHook = MethodHook(hookHelper, logger)
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
@@ -38,7 +37,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             false -> {
                 val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
-                hook.handleLoadPackage(param)
+                methodHook.handleLoadPackage(param)
             }
         }
     }
@@ -48,7 +47,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         XposedBridge.log("OpenFaker: Initializing")
 
         val methodHooks = moduleData.methodHooks
-        hook.reloadMethodHooks(methodHooks)
+        methodHook.reloadMethodHooks(methodHooks.toSet())
     }
 
     inner class PreferenceCallback : MethodHookHandler() {
@@ -57,7 +56,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             XposedBridge.log("OpenFaker: Reloading preferences")
 
             val methodHooks = moduleData.methodHooks
-            hook.reloadMethodHooks(methodHooks)
+            methodHook.reloadMethodHooks(methodHooks.toSet())
         }
     }
 }

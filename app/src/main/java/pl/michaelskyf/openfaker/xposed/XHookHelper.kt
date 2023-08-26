@@ -13,36 +13,17 @@ class XHookHelper : HookHelper() {
         className: String,
         classLoader: ClassLoader,
         methodName: String,
-        vararg parameterTypes: Any
-    ): Result<Method> {
-
-        return try {
-            Result.success(XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes))
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }
+        vararg parameterTypes: Class<Any>
+    ): Result<Method>
+        = runCatching { XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes) }
 
     override fun hookMethod(method: Method, callback: MethodHookHandler) {
-
         XposedBridge.hookMethod(method, XMethodHookHandler(callback))
     }
 
-    override fun findField(classType: Class<*>, fieldName: String): Result<Field> {
+    override fun findField(classType: Class<*>, fieldName: String): Result<Field>
+        = runCatching { XposedHelpers.findField(classType, fieldName) }
 
-        return try {
-            Result.success(XposedHelpers.findField(classType, fieldName))
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }
-
-    override fun findClass(className: String, classLoader: ClassLoader): Result<Class<*>> {
-
-        return try {
-            Result.success(XposedHelpers.findClass(className, classLoader))
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }
+    override fun findClass(className: String, classLoader: ClassLoader): Result<Class<Any>>
+        = runCatching { XposedHelpers.findClass(className, classLoader) as Class<Any> }
 }

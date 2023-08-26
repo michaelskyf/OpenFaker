@@ -18,8 +18,8 @@ class LuaFakerModule private constructor(
 ) : FakerModule(priority) {
 
     companion object {
-        operator fun invoke(priority: Int, luaSource: String): Result<FakerModule> {
-            return try {
+        operator fun invoke(priority: Int, luaSource: String): Result<FakerModule>
+            = runCatching {
                 val globals = JsePlatform.standardGlobals()
                 globals.load(luaSource).call()
 
@@ -27,44 +27,29 @@ class LuaFakerModule private constructor(
                 val registerModule = globals.get("registerModule").checkfunction()
                 val runModule = globals.get("runModule").checkfunction()
 
-                Result.success(LuaFakerModule(priority, globals, runModule, registerModule))
-            } catch (exception: Exception) {
-                Result.failure(exception)
+                LuaFakerModule(priority, globals, runModule, registerModule)
             }
-        }
     }
 
-    override fun run(hookParameters: MethodHookParameters): Result<Boolean> {
-        return try {
-            val result = runModule.call(CoerceJavaToLua.coerce(hookParameters))
-            return Result.success(result.checkboolean())
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }
+    override fun run(hookParameters: MethodHookParameters): Result<Boolean>
+        = runCatching { runModule.call(CoerceJavaToLua.coerce(hookParameters)).checkboolean() }
 
-    override fun getMatchingArgumentsInfo(): Result<MatchingArgumentsInfo> {
-        val matchingArgumentsInfo = LuaMatchingArgumentsInfo()
-        return try {
+    override fun getMatchingArgumentsInfo(): Result<MatchingArgumentsInfo>
+        = runCatching {
+            val matchingArgumentsInfo = LuaMatchingArgumentsInfo()
             registerModule.call(CoerceJavaToLua.coerce(matchingArgumentsInfo))
-            Result.success(matchingArgumentsInfo)
-        } catch (exception: Exception) {
-            Result.failure(exception)
+            matchingArgumentsInfo
         }
-    }
 
     inner class LuaFakerArgumentCheckerFunction(private val luaFunction: LuaFunction) : FakerArgumentCheckerFunction() {
-        override fun call(vararg arguments: Any?): Result<Optional<FakerModule>> {
-            return try {
+        override fun call(vararg arguments: Any?): Result<Optional<FakerModule>>
+            = runCatching {
                 val result = luaFunction.call(CoerceJavaToLua.coerce(arguments))
-                Result.success(when (result.checkboolean()) {
+                when (result.checkboolean()) {
                     true -> Optional.of(this@LuaFakerModule)
                     false -> Optional.empty()
-                })
-            } catch (exception: Exception) {
-                Result.failure(exception)
+                }
             }
-        }
     }
 
     inner class LuaMatchingArgumentsInfo: MatchingArgumentsInfo() {

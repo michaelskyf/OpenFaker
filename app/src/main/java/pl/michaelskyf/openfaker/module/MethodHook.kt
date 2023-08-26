@@ -1,28 +1,33 @@
 package pl.michaelskyf.openfaker.module
 
-import androidx.core.content.contentValuesOf
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
-import java.lang.reflect.Method
 
 // TODO: Thread safety
-class Hook(
+class MethodHook(
     private val hookHelper: HookHelper,
     private val logger: Logger
     ) {
-
     private data class MethodHookInfo(val className: String, val methodName: String, val argumentTypes: Array<String>)
 
     private var methodsToBeHooked: Set<MethodHookInfo> = setOf()
     private var fakerRegistries: Map<ClassMethodPair, Pair<FakerModuleRegistry, FakerModuleRegistry>> = mapOf()
 
-    fun reloadMethodHooks(methodHookHolders: Array<MethodHookHolder>) {
+    fun reloadMethodHooks(methodHookHolders: Set<MethodHookHolder>) {
         val newMethodsToBeHooked = mutableSetOf<MethodHookInfo>()
         val newFakerRegistries = mutableMapOf<ClassMethodPair, Pair<FakerModuleRegistry, FakerModuleRegistry>>()
 
         for (holder in methodHookHolders) {
             newMethodsToBeHooked.add(MethodHookInfo(holder.className, holder.methodName, holder.argumentTypes))
-            newFakerRegistries[Pair(holder.className, holder.methodName)] = Pair(FakerModuleRegistry(), FakerModuleRegistry()) // TODO: before & after
+
+            val (registryBefore, registryAfter) = newFakerRegistries.getOrPut(Pair(holder.className, holder.methodName)) {
+                Pair( FakerModuleRegistry(), FakerModuleRegistry() )
+            }
+
+            when (holder.whenToHook) {
+                MethodHookHolder.WhenToHook.Before -> registryBefore.register(holder.fakerModule)
+                MethodHookHolder.WhenToHook.After -> registryAfter.register(holder.fakerModule)
+            }
         }
 
         methodsToBeHooked = newMethodsToBeHooked
@@ -36,24 +41,17 @@ class Hook(
     private fun hookMethods(param: LoadPackageParam) {
 
         for (methodInfo in methodsToBeHooked) {
-            val mappedArgumentTypes = try {
-                methodInfo.argumentTypes.map { hookHelper.findClass(it, param.classLoader).getOrThrow() }
+            try {
+                val argumentTypes = hookHelper.findClassesFromStrings(param.classLoader, *methodInfo.argumentTypes).getOrThrow()
+                val method = hookHelper.findMethod(methodInfo.className, param.classLoader, methodInfo.methodName, *argumentTypes).getOrThrow()
+                hookHelper.hookMethod(method, Handler())
             } catch (exception: Exception) {
                 logger.log(exception.toString())
-                continue
             }
-
-            val foundMethod = hookHelper.findMethod(methodInfo.className, param.classLoader, methodInfo.methodName, mappedArgumentTypes)
-            if (foundMethod.isFailure) {
-                logger.log(foundMethod.exceptionOrNull().toString())
-                continue
-            }
-
-            hookHelper.hookMethod(foundMethod.getOrThrow(), Handler())
         }
     }
 
-    inner class Handler: MethodHookHandler() {
+    private inner class Handler: MethodHookHandler() {
 
         override fun beforeHookedMethod(hookParameters: MethodHookParameters) {
 
