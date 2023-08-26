@@ -21,7 +21,7 @@ class HookTest {
             mockk(),
             mockk()
         )
-        val hook = Hook(hookHelper, methodsToBeHooked, mapOf(), logger)
+        val hook = Hook(hookHelper, logger)
 
         val param = mockk<LoadPackageParam>()
 

@@ -1,6 +1,5 @@
 package pl.michaelskyf.openfaker.ui
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -14,10 +13,8 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.databinding.OptionRowBinding
-import pl.michaelskyf.openfaker.module.PrefsListener
 
 class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder>()
 {
@@ -98,22 +95,11 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
 
     }
 
-    @SuppressLint("ApplySharedPref")
     private fun updatedCallback(context: Context): Boolean {
 
-        val pref = try {
-            context.getSharedPreferences(PrefsListener().prefName, Context.MODE_WORLD_READABLE)
-        } catch (e: SecurityException) {
-            return false
-        } ?: return false
+        val fakerData = UIFakerData(context).getOrElse { return false }
 
-        val gson = Gson()
-        val mappedProperties = properties.map { "TODO" }
-        val json = gson.toJson(mappedProperties)
-            ?: return false
-
-        pref.edit().putString("xposed_method_args", json).commit()
-
-        return PrefsListener().reload()
+        // TODO
+        return true
     }
 }

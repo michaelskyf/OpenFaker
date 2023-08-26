@@ -2,42 +2,44 @@ package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.module.Hook
 import pl.michaelskyf.openfaker.module.LoadPackageParam
-import pl.michaelskyf.openfaker.module.PrefsListener
+import pl.michaelskyf.openfaker.module.MethodHookHandler
+import pl.michaelskyf.openfaker.module.MethodHookParameters
+import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 
 typealias ClassMethodPair = Pair<String, String>
 
-
-
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    private val hook = Hook(XHookHelper(), setOf(), mapOf(), XLogger())
+    private val hookHelper = XHookHelper()
+    private val logger = XLogger()
+    private val moduleData = XFakerData()
+    private val hook = Hook(hookHelper, logger)
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
         XposedBridge.log("OpenFaker: New app: " + lpparam.packageName)
 
-        if (lpparam.packageName == BuildConfig.APPLICATION_ID)
-        {
-            val method = XposedHelpers.findMethodExact("pl.michaelskyf.openfaker.module.PrefsListener", lpparam.classLoader, "reload")
-            if (method == null)
-            {
-                XposedBridge.log("OpenFaker: Failed to hook PrefsListener!")
-                return
+        when (lpparam.packageName == BuildConfig.APPLICATION_ID) {
+            true -> {
+                val result = hookHelper.findMethod(FakerData::class.java.name, lpparam.classLoader, FakerData::methodHooks::get::class.java.name)
+                val method = result.getOrElse {
+                    logger.log(it.toString())
+                    return
+                }
+
+                hookHelper.hookMethod(method, PreferenceCallback())
             }
 
-            XposedBridge.hookMethod(method, PreferenceCallback())
-        } else {
-
-            val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
-            hook.handleLoadPackage(param)
+            false -> {
+                val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
+                hook.handleLoadPackage(param)
+            }
         }
     }
 
@@ -45,21 +47,17 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         XposedBridge.log("OpenFaker: Initializing")
 
-        val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID, PrefsListener().prefName)
-
-        val json = preferences.getString("xposed_method_args", null)
-            ?: return
+        val methodHooks = moduleData.methodHooks
+        hook.reloadMethodHooks(methodHooks)
     }
 
-    inner class PreferenceCallback : XC_MethodHook() {
-        override fun beforeHookedMethod(param: MethodHookParam?) {
+    inner class PreferenceCallback : MethodHookHandler() {
+        override fun beforeHookedMethod(param: MethodHookParameters) {
 
             XposedBridge.log("OpenFaker: Reloading preferences")
 
-            val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID, PrefsListener().prefName)
-
-            val json = preferences.getString("xposed_method_args", null)
-                ?: return
+            val methodHooks = moduleData.methodHooks
+            hook.reloadMethodHooks(methodHooks)
         }
     }
 }

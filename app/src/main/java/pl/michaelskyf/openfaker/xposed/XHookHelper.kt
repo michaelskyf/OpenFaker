@@ -2,9 +2,8 @@ package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
-import pl.michaelskyf.openfaker.module.Hook
 import pl.michaelskyf.openfaker.module.HookHelper
-import java.lang.Exception
+import pl.michaelskyf.openfaker.module.MethodHookHandler
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 
@@ -15,22 +14,35 @@ class XHookHelper : HookHelper() {
         classLoader: ClassLoader,
         methodName: String,
         vararg parameterTypes: Any
-    ): Method? {
+    ): Result<Method> {
 
-        return XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes)
+        return try {
+            Result.success(XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes))
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 
-    override fun hookMethod(method: Method, callback: Hook.MethodHookHandler) {
+    override fun hookMethod(method: Method, callback: MethodHookHandler) {
 
         XposedBridge.hookMethod(method, XMethodHookHandler(callback))
     }
 
-    override fun findField(classType: Class<*>, fieldName: String): Field? {
+    override fun findField(classType: Class<*>, fieldName: String): Result<Field> {
 
         return try {
-            XposedHelpers.findField(classType, fieldName)
+            Result.success(XposedHelpers.findField(classType, fieldName))
         } catch (exception: Exception) {
-            null
+            Result.failure(exception)
+        }
+    }
+
+    override fun findClass(className: String, classLoader: ClassLoader): Result<Class<*>> {
+
+        return try {
+            Result.success(XposedHelpers.findClass(className, classLoader))
+        } catch (exception: Exception) {
+            Result.failure(exception)
         }
     }
 }

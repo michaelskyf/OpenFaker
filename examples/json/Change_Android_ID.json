@@ -5,5 +5,7 @@
     "android.content.ContentResolver",
     "java.lang.String"
   ],
-  "luaScript": "==< Check 'examples/lua/Change_Android_ID.lua' >=="
+  "luaScript": "==< Check 'examples/lua/Change_Android_ID.lua' >==",
+  "when": "before",
+  "priority" : 0
 }
