@@ -5,7 +5,11 @@ import pl.michaelskyf.openfaker.module.MethodHookParameters
 import java.lang.reflect.Method
 
 class XMethodHookParameters(private val param: MethodHookParam)
-    : MethodHookParameters(param.method as Method, param.args) {
+    : MethodHookParameters(param.method as Method) {
+
+    override var arguments: Array<out Any?>
+        get() = param.args
+        set(value) { param.args = value }
 
     override var result: Any?
         get() = param.result

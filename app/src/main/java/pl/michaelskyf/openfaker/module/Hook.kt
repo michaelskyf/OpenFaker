@@ -43,8 +43,13 @@ class Hook(
             val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
 
             for (module in matchingModules) {
-                val result = module.run(hookParameters)
-                if (result.getOrDefault(false)) break
+                val hookParametersCopy = hookParameters.clone() as MethodHookParameters
+                val result = module.run(hookParametersCopy)
+                if (result.getOrDefault(false)) {
+                    hookParameters.result = hookParametersCopy.result
+                    hookParameters.arguments = hookParametersCopy.arguments
+                    return
+                }
 
                 result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
