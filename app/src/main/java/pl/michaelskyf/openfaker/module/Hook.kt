@@ -25,7 +25,7 @@ class Hook(
 
         fun beforeHookedMethod(hookParameters: MethodHookParameters) {
 
-            val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.second
+            val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.first
                 ?: return
 
             runModules(hookParameters, moduleRegistry)

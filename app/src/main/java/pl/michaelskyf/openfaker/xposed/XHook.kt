@@ -18,7 +18,7 @@ typealias ClassMethodPair = Pair<String, String>
 
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    private val hook = Hook(XHookHelper(), mapOf(), XLogger())
+    private val hook = Hook(XHookHelper(), setOf(), mapOf(), XLogger())
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 

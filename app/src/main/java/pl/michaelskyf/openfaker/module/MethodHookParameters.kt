@@ -1,9 +1,9 @@
 package pl.michaelskyf.openfaker.module
 
-import java.lang.reflect.Member
+import java.lang.reflect.Method
 
 abstract class MethodHookParameters(
-    val method: Member,
+    val method: Method,
     val arguments: Array<*>
     ) {
     abstract var result: Any?

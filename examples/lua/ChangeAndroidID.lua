@@ -57,7 +57,5 @@ end
     WARNING! This function must be present otherwise the module will be discarded
 --]]
 function runModule(hookParameters)
-    -- TODO: Check if these assignments work
-    hookParameters.result = "Fake Android ID"
     hookParameters:setResult("Fake Android ID")
 end
