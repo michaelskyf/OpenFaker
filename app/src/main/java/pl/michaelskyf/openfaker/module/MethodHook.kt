@@ -38,10 +38,20 @@ class MethodHook(
 
     fun hookMethods(param: LoadPackageParam) {
 
+        val stringToClassMap = mutableMapOf<String, Class<Any>>()
+
         for (methodInfo in methodsToBeHooked) {
             try {
-                val argumentTypes = hookHelper.findClassesFromStrings(param.classLoader, *methodInfo.argumentTypes).getOrThrow()
-                val method = hookHelper.findMethod(methodInfo.className, param.classLoader, methodInfo.methodName, *argumentTypes).getOrThrow()
+                val className = methodInfo.className
+                val classLoader = param.classLoader
+                val methodName = methodInfo.methodName
+                val argumentTypesStrings = methodInfo.argumentTypes
+
+                val argumentTypes = argumentTypesStrings.map {
+                    stringToClassMap.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
+                }.toTypedArray()
+
+                val method = hookHelper.findMethod(className, classLoader, methodName, *argumentTypes).getOrThrow()
                 hookHelper.hookMethod(method, Handler())
             } catch (exception: Exception) {
                 logger.log(exception.toString())

@@ -1,6 +1,5 @@
 package pl.michaelskyf.openfaker.module
 
-import io.mockk.awaits
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -16,11 +15,11 @@ import java.lang.reflect.Method
 class MethodHookTest {
     class TestLogger: Logger() {
         override fun log(tag: String, message: String) {
-            println("$tag $message")
+            // println("$tag $message")
         }
 
         override fun log(message: String) {
-            println(message)
+            // println(message)
         }
     }
 
@@ -57,7 +56,6 @@ class MethodHookTest {
         every { matchingArgumentsInfo.exactMatchArguments } returns mutableListOf()
         every { matchingArgumentsInfo.customArgumentMatchingFunctions } returns mutableListOf()
 
-        every { hookHelper.findClassesFromStrings(any(), *anyVararg()) } returns runCatching { arrayOf() }
         every { hookHelper.findMethod("some.class", any(), any(), *anyVararg()) } returns runCatching { TestClass::class.java.methods[0] }
         every { hookHelper.findMethod("some.other.class", any(), any(), *anyVararg()) } returns runCatching { TestClass::class.java.methods[1] }
         every { hookHelper.hookMethod(any(), any()) } just runs
@@ -98,7 +96,6 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findClassesFromStrings(any(), *anyVararg()) } returns runCatching { arrayOf() }
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
@@ -142,7 +139,6 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findClassesFromStrings(any(), *anyVararg()) } returns runCatching { arrayOf() }
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
@@ -186,7 +182,6 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findClassesFromStrings(any(), *anyVararg()) } returns runCatching { arrayOf() }
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
@@ -229,7 +224,6 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findClassesFromStrings(any(), *anyVararg()) } returns runCatching { arrayOf() }
         every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
@@ -253,8 +247,6 @@ class MethodHookTest {
         class TestClass { fun validMethod() {} }
         val method = TestClass::class.java.methods.first()
 
-        every { hookHelper.findClassesFromStrings(any(), *varargAny { it == String::class.java.name }) } returns
-                kotlin.runCatching { arrayOf(String::class.java as Class<Any>) }
         every { hookHelper.findClass("InvalidType", any()) } throws
                 Exception("Class not found")
         every { hookHelper.findClass(String::class.java.name, any()) } returns

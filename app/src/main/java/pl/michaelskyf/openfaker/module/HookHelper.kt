@@ -8,6 +8,4 @@ abstract class HookHelper {
     abstract fun hookMethod(method: Method, callback: MethodHookHandler)
     abstract fun findField(classType: Class<*>, fieldName: String): Result<Field>
     abstract fun findClass(className: String, classLoader: ClassLoader): Result<Class<Any>>
-    fun findClassesFromStrings(classLoader: ClassLoader, vararg classNames: String)
-        = runCatching { classNames.map { findClass(it, classLoader).getOrThrow() }.toTypedArray() }
 }
