@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.module
 
+import io.mockk.awaits
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.fail
 import pl.michaelskyf.openfaker.lua.LuaFakerModule
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import java.lang.reflect.Method
-import kotlin.math.log
 
 class MethodHookTest {
     class TestLogger: Logger() {
@@ -245,11 +245,46 @@ class MethodHookTest {
         assert(hookParameters.result == null)
     }
 
-    /*@Test
-    fun `hookMethods() should only hook found methods`() {
+    @Test
+    fun `hookMethods() should not throw any exception when hooking functions`() {
         val hookHelper = mockk<HookHelper>()
         val methodHook = MethodHook(hookHelper, logger)
 
+        class TestClass { fun validMethod() {} }
+        val method = TestClass::class.java.methods.first()
 
-    }*/
+        every { hookHelper.findClassesFromStrings(any(), *varargAny { it == String::class.java.name }) } returns
+                kotlin.runCatching { arrayOf(String::class.java as Class<Any>) }
+        every { hookHelper.findClass("InvalidType", any()) } throws
+                Exception("Class not found")
+        every { hookHelper.findClass(String::class.java.name, any()) } returns
+                runCatching { String::class.java as Class<Any> }
+        every { hookHelper.findMethod("valid.class", any(), "invalidMethod") } throws
+                Exception("Method not found")
+        every { hookHelper.findMethod("valid.class", any(), "validMethod", *varargAny { it == String::class.java }) } returns
+                runCatching { method }
+        every { hookHelper.hookMethod(any(), any()) } just runs
+
+        val fakerModule = mockk<FakerModule>()
+        every { fakerModule.getMatchingArgumentsInfo() } returns runCatching { mockk(relaxed = true) }
+
+        val methodHookHolders = setOf(
+            MethodHookHolder("valid.class", "validMethod", arrayOf(String::class.java.name),
+                fakerModule, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder("invalid.class", "validMethod", arrayOf(String::class.java.name),
+                fakerModule, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder("valid.class", "invalidMethod", arrayOf(String::class.java.name),
+                fakerModule, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder("valid.class", "validMethod", arrayOf("invalidType"),
+                fakerModule, MethodHookHolder.WhenToHook.Before)
+        )
+        methodHook.reloadMethodHooks(methodHookHolders)
+
+        val param = mockk<LoadPackageParam>()
+        every { param.classLoader } returns this.javaClass.classLoader!!
+
+        methodHook.hookMethods(param)
+
+        verify(exactly = 1) { hookHelper.hookMethod(any(), any()) }
+    }
 }
