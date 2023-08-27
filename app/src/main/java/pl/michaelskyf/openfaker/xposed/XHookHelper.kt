@@ -13,9 +13,16 @@ class XHookHelper : HookHelper() {
         className: String,
         classLoader: ClassLoader,
         methodName: String,
-        vararg parameterTypes: Class<Any>
+        vararg parameterTypes: Class<*>
     ): Result<Method>
         = runCatching { XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes) }
+
+    override fun findMethod(
+        clazz: Class<Any>,
+        methodName: String,
+        vararg parameterTypes: Class<*>
+    ): Result<Method>
+            = runCatching { XposedHelpers.findMethodExact(clazz, methodName, *parameterTypes) }
 
     override fun hookMethod(method: Method, callback: MethodHookHandler) {
         XposedBridge.hookMethod(method, XMethodHookHandler(callback))

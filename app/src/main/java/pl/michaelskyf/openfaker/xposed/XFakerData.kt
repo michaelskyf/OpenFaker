@@ -6,6 +6,8 @@ import androidx.core.content.edit
 import com.google.gson.Gson
 import de.robv.android.xposed.XSharedPreferences
 import pl.michaelskyf.openfaker.BuildConfig
+import pl.michaelskyf.openfaker.lua.LuaFakerModule
+import pl.michaelskyf.openfaker.lua.LuaScriptHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 
@@ -22,10 +24,10 @@ class XFakerData private constructor(
         }
     }
 
-    override var methodHooks: Array<MethodHookHolder>
+    override var methodHooks: Array<LuaScriptHolder>
         get() {
-            val jsonObjects = sharedPreferences.getString(methodHooksKey, null) ?: return arrayOf()
-            return Gson().fromJson(jsonObjects, Array<MethodHookHolder>::class.java) ?: return arrayOf()
+            val json = sharedPreferences.getString(methodHooksKey, null) ?: return arrayOf()
+            return Gson().fromJson(json, Array<LuaScriptHolder>::class.java) ?: return arrayOf()
         }
 
         set(value) {

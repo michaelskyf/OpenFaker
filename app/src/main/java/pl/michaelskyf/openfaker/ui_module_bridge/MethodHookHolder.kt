@@ -2,7 +2,7 @@ package pl.michaelskyf.openfaker.ui_module_bridge
 
 import pl.michaelskyf.openfaker.module.FakerModule
 
-data class MethodHookHolder(
+open class MethodHookHolder(
     val className: String,
     val methodName: String,
     val argumentTypes: Array<String>,

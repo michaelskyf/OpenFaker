@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.module
 
+import de.robv.android.xposed.XposedBridge
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 import pl.michaelskyf.openfaker.xposed.XMethodHookParameters
@@ -27,8 +28,8 @@ class MethodHook(
             }
 
             when (holder.whenToHook) {
-                MethodHookHolder.WhenToHook.Before -> registryBefore.register(holder.fakerModule)
-                MethodHookHolder.WhenToHook.After -> registryAfter.register(holder.fakerModule)
+                MethodHookHolder.WhenToHook.Before -> registryBefore.register(holder.fakerModule).getOrElse { logger.log(it.toString()) }
+                MethodHookHolder.WhenToHook.After -> registryAfter.register(holder.fakerModule).getOrElse { logger.log(it.toString()) }
             }
         }
 
@@ -38,7 +39,8 @@ class MethodHook(
 
     fun hookMethods(param: LoadPackageParam) {
 
-        val stringToClassMap = mutableMapOf<String, Class<Any>>()
+        // Classes may only be cached per-package, since specific classes may not be accessible in all packages
+        val resolvedClassCache = mutableMapOf<String, Class<Any>>()
 
         for (methodInfo in methodsToBeHooked) {
             try {
@@ -48,7 +50,7 @@ class MethodHook(
                 val argumentTypesStrings = methodInfo.argumentTypes
 
                 val argumentTypes = argumentTypesStrings.map {
-                    stringToClassMap.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
+                    resolvedClassCache.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
                 }.toTypedArray()
 
                 val method = hookHelper.findMethod(className, classLoader, methodName, *argumentTypes).getOrThrow()

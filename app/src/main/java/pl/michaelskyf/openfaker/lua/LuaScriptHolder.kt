@@ -1,0 +1,17 @@
+package pl.michaelskyf.openfaker.lua
+
+import pl.michaelskyf.openfaker.module.Priority
+import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
+
+class LuaScriptHolder(
+    val className: String,
+    val methodName: String,
+    val argumentTypes: Array<String>,
+    val luaScript: String,
+    val priority: Int,
+    val whenToHook: MethodHookHolder.WhenToHook
+    ) {
+    fun toMethodHookHolder(): Result<MethodHookHolder> = kotlin.runCatching {
+        MethodHookHolder(className, methodName, argumentTypes, LuaFakerModule(priority, luaScript).getOrThrow(), whenToHook)
+    }
+}

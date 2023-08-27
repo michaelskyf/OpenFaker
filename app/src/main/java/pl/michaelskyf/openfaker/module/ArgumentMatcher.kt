@@ -1,5 +1,8 @@
 package pl.michaelskyf.openfaker.module
 
+import de.robv.android.xposed.XposedBridge
+import de.robv.android.xposed.XposedHelpers
+
 class ArgumentMatcher private constructor(
     private val match: MutableMap<Any?, ArgumentMatcher>,
     private var ignore: ArgumentMatcher?,
@@ -27,8 +30,8 @@ class ArgumentMatcher private constructor(
             return
         }
 
+        // TODO: Rewrite
         val argument = arguments.first()
-        // TODO: Rework
         when (argument.shouldIgnore) {
             true -> if (ignore != null ) {
                 ignore!!.add(arguments.sliceArray(1 until arguments.size), module)

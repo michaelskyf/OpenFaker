@@ -5,10 +5,12 @@ import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
+import pl.michaelskyf.openfaker.lua.LuaScriptHolder
 import pl.michaelskyf.openfaker.module.MethodHook
 import pl.michaelskyf.openfaker.module.LoadPackageParam
 import pl.michaelskyf.openfaker.module.MethodHookHandler
 import pl.michaelskyf.openfaker.module.MethodHookParameters
+import pl.michaelskyf.openfaker.ui.UIFakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 
 typealias ClassMethodPair = Pair<String, String>
@@ -26,7 +28,9 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         when (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             true -> {
-                val result = hookHelper.findMethod(FakerData::class.java.name, lpparam.classLoader, FakerData::methodHooks::get::class.java.name)
+                val clazz = hookHelper.findClass(UIFakerData::class.java.name, lpparam.classLoader).getOrThrow()
+                val ret = hookHelper.findClass(Array<LuaScriptHolder>::class.java.name, lpparam.classLoader).getOrThrow()
+                val result = hookHelper.findMethod(clazz, "setMethodHooks", ret)
                 val method = result.getOrElse {
                     logger.log(it.toString())
                     return
@@ -46,7 +50,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         XposedBridge.log("OpenFaker: Initializing")
 
-        val methodHooks = moduleData.methodHooks
+        val methodHooks = moduleData.methodHooks.map { it.toMethodHookHolder().getOrThrow() }
         methodHook.reloadMethodHooks(methodHooks.toSet())
     }
 
@@ -55,7 +59,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             XposedBridge.log("OpenFaker: Reloading preferences")
 
-            val methodHooks = moduleData.methodHooks
+            val methodHooks = moduleData.methodHooks.map { it.toMethodHookHolder().getOrThrow() }
             methodHook.reloadMethodHooks(methodHooks.toSet())
         }
     }

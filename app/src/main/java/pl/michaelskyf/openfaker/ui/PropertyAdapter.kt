@@ -2,7 +2,10 @@ package pl.michaelskyf.openfaker.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentProvider
+import android.content.ContentResolver
 import android.content.Context
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.databinding.OptionRowBinding
+import pl.michaelskyf.openfaker.lua.LuaScriptHolder
+import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 
 class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder>()
 {
@@ -99,7 +104,29 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
 
         val fakerData = UIFakerData(context).getOrElse { return false }
 
-        // TODO
+        val lua = """
+            function registerModule(moduleRegistry)
+                local contentResolver = argument:ignore()
+                local name = argument:require("android_id")
+                
+                moduleRegistry:exactMatchArgument({contentResolver, name})
+            end
+            
+            function runModule(hookParameters)
+                hookParameters:setResult("Fake Android ID")
+	            return true
+            end
+        """.trimIndent()
+        fakerData.methodHooks = arrayOf(
+            LuaScriptHolder(
+                Settings.Secure::class.java.name,
+                "getString",
+                arrayOf(ContentResolver::class.java.name, String::class.java.name),
+                lua,
+                0,
+                MethodHookHolder.WhenToHook.Before)
+        )
+
         return true
     }
 }

@@ -96,7 +96,7 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -139,7 +139,7 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -182,7 +182,7 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -224,7 +224,7 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)

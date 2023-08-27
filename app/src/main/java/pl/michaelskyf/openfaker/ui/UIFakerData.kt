@@ -2,6 +2,9 @@ package pl.michaelskyf.openfaker.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
+import com.google.gson.Gson
+import pl.michaelskyf.openfaker.lua.LuaScriptHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 
@@ -20,7 +23,14 @@ class UIFakerData private constructor(
         }
     }
 
-    override var methodHooks: Array<MethodHookHolder>
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var methodHooks: Array<LuaScriptHolder>
+        get() {
+            val json = sharedPreferences.getString(methodHooksKey, null) ?: return arrayOf()
+            return Gson().fromJson(json, Array<LuaScriptHolder>::class.java) ?: return arrayOf()
+        }
+
+        set(value) {
+            val result = Gson().toJson(value) ?: return
+            sharedPreferences.edit(commit = true) { this.putString(methodHooksKey, result) }
+        }
 }
