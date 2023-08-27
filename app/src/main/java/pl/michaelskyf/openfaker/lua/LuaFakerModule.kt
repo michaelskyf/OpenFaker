@@ -2,7 +2,10 @@ package pl.michaelskyf.openfaker.lua
 
 import org.luaj.vm2.Globals
 import org.luaj.vm2.LuaFunction
+import org.luaj.vm2.LuaTable
+import org.luaj.vm2.LuaValue
 import org.luaj.vm2.lib.jse.CoerceJavaToLua
+import org.luaj.vm2.lib.jse.CoerceLuaToJava
 import org.luaj.vm2.lib.jse.JsePlatform
 import pl.michaelskyf.openfaker.module.FakerModule
 import pl.michaelskyf.openfaker.module.FunctionArgument
@@ -61,4 +64,17 @@ class LuaFakerModule private constructor(
             customArgumentMatchingFunctions.add(LuaFakerArgumentCheckerFunction(luaFunction))
         }
     }
+
+    /*inner class LuaMethodHookParameters(private val methodHookParameters: MethodHookParameters):
+        MethodHookParameters(methodHookParameters.method, methodHookParameters.arguments) {
+        override var result: Any?
+            get() = methodHookParameters.result
+            set(value) { methodHookParameters.result = value }
+
+        fun getArgumentAt(index: Int) = methodHookParameters.arguments[index]
+        fun getArray() = arrayOf("XD", "XD2")
+        fun setArgumentAt(index: Int, value: Any?) {
+            methodHookParameters.arguments[index] = value
+        }
+    }*/
 }

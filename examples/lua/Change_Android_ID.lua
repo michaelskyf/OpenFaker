@@ -58,4 +58,5 @@ end
 --]]
 function runModule(hookParameters)
     hookParameters:setResult("Fake Android ID")
+	return true
 end

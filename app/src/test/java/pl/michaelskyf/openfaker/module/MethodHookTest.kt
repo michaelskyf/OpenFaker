@@ -23,10 +23,9 @@ class MethodHookTest {
         }
     }
 
-    class TestHookParameters(method: Method, private var methodResult: Any? = null, private vararg var methodArguments: Any?): MethodHookParameters(method) {
-        override var arguments: Array<out Any?>
-            get() = methodArguments
-            set(value) { methodArguments = value }
+    class TestHookParameters(method: Method, methodArguments: Array<Any?> = arrayOf()): MethodHookParameters(method, methodArguments) {
+
+        private var methodResult: Any? = null
         override var result: Any?
             get() = methodResult
             set(value) { methodResult = value }
@@ -107,48 +106,51 @@ class MethodHookTest {
         assert(hookParameters.result == "Fake value set by the script")
     }
 
-    /*@Test
-    fun `afterHookedMethod() should fake the return value of the hooked function via lua script if runModule() returns true`() {
-        val fakeValue = "Fake Value Set By The Script"
+    @Test
+    fun `afterHookedMethod() should fake the return value and the given argument of the hooked function via lua script if runModule() returns true`() {
         val luaScript = """
             function registerModule(moduleRegistry)
-                moduleRegistry:exactMatchArguments({argument:require("Hello"), argument:require("World")})
+                moduleRegistry:exactMatchArguments({argument:require("Argument")})
             end
             
             function runModule(hookParameters)
-                hookParameters:setResult("$fakeValue")
+                local arguments = hookParameters:getArguments()
+                arguments[1] = "Fake Argument"
+                
+                hookParameters:setResult("Fake value set by the script")
                 return true
             end
         """.trimIndent()
-
         val hookHelper = mockk<HookHelper>()
-        val logger = mockk<Logger>(relaxed = true)
-        val registry = FakerModuleRegistry()
-        val module = LuaFakerModule(0, luaScript).getOrThrow()
-        registry.register(module).getOrThrow()
-        class TestClass {
-            fun testMethod(x: String, y: String): String {
-                return "$x $y"
-            }
-        }
-        val method = TestClass::class.java.methods.first()
-        val hookMap = mapOf(
-            Pair(
-                Pair(method.declaringClass.name, method.name),
-                Pair(FakerModuleRegistry(), registry)
-            )
+        val fakerModule = LuaFakerModule(0, luaScript).getOrThrow()
+        val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
+        val capturedHookHandler = slot<MethodHookHandler>()
+        class TestClass { fun firstMethod() {} fun secondMethod() {} }
+        val method = TestClass::class.java.methods[0]
+
+        val methodHookHolders = setOf(
+            MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
         )
-        val hook = Hook(hookHelper, setOf(), hookMap, logger)
 
-        class TestParam(override var arguments: Array<out Any?>, override var result: Any? = null): MethodHookParameters(method)
+        val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        val param = TestParam(arrayOf("Hello", "World"))
-        hook.MethodHookHandler().afterHookedMethod(param)
+        every { hookHelper.findClassesFromStrings(any(), *anyVararg()) } returns runCatching { arrayOf() }
+        every { hookHelper.findMethod(any(), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        assert(param.result == fakeValue)
+        val methodHook = MethodHook(hookHelper, logger)
+        methodHook.reloadMethodHooks(methodHookHolders)
+        methodHook.handleLoadPackage(loadPackageParam)
+
+        val hookParameters = TestHookParameters(method, arrayOf("Argument"))
+        val hookHandler = capturedHookHandler.captured
+        hookHandler.afterHookedMethod(hookParameters)
+
+        assert(hookParameters.arguments.first() == "Fake Argument")
+        assert(hookParameters.result == "Fake value set by the script")
     }
 
-    @Test
+    /*@Test
     fun `beforeHookedMethod() should not fake the return value of the hooked function if the lua script does not return a boolean`() {
         val fakeValue = "Fake Value Set By The Script"
         val luaScript = """
