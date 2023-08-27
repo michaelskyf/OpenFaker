@@ -2,6 +2,8 @@ package pl.michaelskyf.openfaker.module
 
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
+import pl.michaelskyf.openfaker.xposed.XMethodHookParameters
+import java.lang.reflect.Method
 
 // TODO: Thread safety
 class MethodHook(
@@ -34,11 +36,7 @@ class MethodHook(
         fakerRegistries = newFakerRegistries
     }
 
-    fun handleLoadPackage(param: LoadPackageParam) {
-        hookMethods(param)
-    }
-
-    private fun hookMethods(param: LoadPackageParam) {
+    fun hookMethods(param: LoadPackageParam) {
 
         for (methodInfo in methodsToBeHooked) {
             try {
@@ -73,7 +71,7 @@ class MethodHook(
             val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
 
             for (module in matchingModules) {
-                val hookParametersCopy = hookParameters.clone() as MethodHookParameters
+                val hookParametersCopy = TemporaryMethodHookParameters(hookParameters.method, hookParameters.arguments.clone(), hookParameters.result)
                 val result = module.run(hookParametersCopy)
                 if (result.getOrDefault(false)) {
                     hookParameters.result = hookParametersCopy.result
@@ -84,5 +82,11 @@ class MethodHook(
                 result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
         }
+
+        private inner class TemporaryMethodHookParameters(
+            override val method: Method,
+            override var arguments: Array<Any?>,
+            override var result: Any?
+        ): MethodHookParameters(method)
     }
 }

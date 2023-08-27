@@ -64,17 +64,4 @@ class LuaFakerModule private constructor(
             customArgumentMatchingFunctions.add(LuaFakerArgumentCheckerFunction(luaFunction))
         }
     }
-
-    /*inner class LuaMethodHookParameters(private val methodHookParameters: MethodHookParameters):
-        MethodHookParameters(methodHookParameters.method, methodHookParameters.arguments) {
-        override var result: Any?
-            get() = methodHookParameters.result
-            set(value) { methodHookParameters.result = value }
-
-        fun getArgumentAt(index: Int) = methodHookParameters.arguments[index]
-        fun getArray() = arrayOf("XD", "XD2")
-        fun setArgumentAt(index: Int, value: Any?) {
-            methodHookParameters.arguments[index] = value
-        }
-    }*/
 }

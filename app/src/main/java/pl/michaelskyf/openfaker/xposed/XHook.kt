@@ -37,7 +37,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             false -> {
                 val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
-                methodHook.handleLoadPackage(param)
+                methodHook.hookMethods(param)
             }
         }
     }
