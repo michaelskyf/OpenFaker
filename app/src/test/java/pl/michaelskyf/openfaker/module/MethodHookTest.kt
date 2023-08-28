@@ -45,13 +45,21 @@ class MethodHookTest {
     }
 
     private class TestFakerData: FakerData() {
-        override var methodHooks: Array<LuaScriptHolder>
-            get() = TODO("Not yet implemented")
-            set(value) {}
+        override fun get(className: String, methodName: String): Result<Array<MethodHookHolder>> {
+            TODO("Not yet implemented")
+        }
 
-        override fun hasChanged(): Boolean
-            = false
+        override fun set(className: String, methodName: String, json: String) {
+            TODO("Not yet implemented")
+        }
 
+        override fun all(): Set<Array<LuaScriptHolder>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun reload(): Boolean {
+            return false
+        }
     }
 
     @Test

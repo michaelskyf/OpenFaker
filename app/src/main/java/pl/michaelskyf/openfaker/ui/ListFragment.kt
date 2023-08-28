@@ -1,15 +1,13 @@
 package pl.michaelskyf.openfaker.ui
 
-import android.R
-import android.content.ContentResolver
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.provider.Settings.Secure
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
 import pl.michaelskyf.openfaker.lua.LuaScriptHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
@@ -57,14 +55,15 @@ class ListFragment : Fragment() {
             end
         """.trimIndent()
 
-        fakerData.methodHooks = arrayOf(
-            LuaScriptHolder(
-                MediaPlayer::class.java.name,
-                "setDataSource",
-                arrayOf(String::class.java.name),
-                lua,
-                0,
-                MethodHookHolder.WhenToHook.Before)
+        fakerData[MediaPlayer::class.java.name, "setDataSource"] = Gson().toJson(
+                LuaScriptHolder(
+                    MediaPlayer::class.java.name,
+                    "setDataSource",
+                    arrayOf(String::class.java.name),
+                    lua,
+                    0,
+                    MethodHookHolder.WhenToHook.Before
+                )
         )
     }
 

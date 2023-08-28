@@ -3,7 +3,6 @@ package pl.michaelskyf.openfaker.ui
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.google.gson.Gson
 import pl.michaelskyf.openfaker.lua.LuaScriptHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
@@ -23,19 +22,18 @@ class UIFakerData private constructor(
         }
     }
 
-    override var methodHooks: Array<LuaScriptHolder>
-        get() {
-            val json = sharedPreferences.getString(methodHooksKey, null) ?: return arrayOf()
-            return Gson().fromJson(json, Array<LuaScriptHolder>::class.java) ?: return arrayOf()
-        }
-
-        set(value) {
-            val result = Gson().toJson(value) ?: return
-            sharedPreferences.edit(commit = true) { this.putString(methodHooksKey, result) }
-        }
-
-    override fun hasChanged(): Boolean {
-        // I don't think this is needed for the ui
-        return false
+    override fun get(className: String, methodName: String): Result<Array<MethodHookHolder>> = runCatching {
+        TODO()
     }
+
+    override fun set(className: String, methodName: String, json: String) {
+        sharedPreferences.edit(commit = true) { this.putString("$className.$methodName", json) }
+    }
+
+    override fun all(): Set<Array<LuaScriptHolder>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun reload(): Boolean
+        = false // Should it always return false?
 }

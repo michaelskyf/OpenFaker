@@ -102,31 +102,6 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
 
     private fun updatedCallback(context: Context): Boolean {
 
-        val fakerData = UIFakerData(context).getOrElse { return false }
-
-        val lua = """
-            function registerModule(moduleRegistry)
-                local contentResolver = argument:ignore()
-                local name = argument:require("android_id")
-                
-                moduleRegistry:exactMatchArgument({contentResolver, name})
-            end
-            
-            function runModule(hookParameters)
-                hookParameters:setResult("Fake Android ID")
-	            return true
-            end
-        """.trimIndent()
-        fakerData.methodHooks = arrayOf(
-            LuaScriptHolder(
-                Settings.Secure::class.java.name,
-                "getString",
-                arrayOf(ContentResolver::class.java.name, String::class.java.name),
-                lua,
-                0,
-                MethodHookHolder.WhenToHook.Before)
-        )
-
         return true
     }
 }

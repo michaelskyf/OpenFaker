@@ -1,40 +1,49 @@
 package pl.michaelskyf.openfaker.xposed
 
-import android.content.SharedPreferences
-import android.os.Build
-import androidx.core.content.edit
 import com.google.gson.Gson
 import de.robv.android.xposed.XSharedPreferences
 import pl.michaelskyf.openfaker.BuildConfig
-import pl.michaelskyf.openfaker.lua.LuaFakerModule
 import pl.michaelskyf.openfaker.lua.LuaScriptHolder
+import pl.michaelskyf.openfaker.module.Logger
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 
 class XFakerData private constructor(
+    private val logger: Logger,
     private val sharedPreferences: XSharedPreferences
 ): FakerData() {
 
     companion object {
-        operator fun invoke(): XFakerData {
+        operator fun invoke(logger: Logger): XFakerData {
             val sharedPreferences = XSharedPreferences(BuildConfig.APPLICATION_ID, FakerData.fakerDataFileName)
             sharedPreferences.makeWorldReadable()
 
-            return XFakerData(sharedPreferences)
+            return XFakerData(logger, sharedPreferences)
         }
     }
 
-    override var methodHooks: Array<LuaScriptHolder>
-        get() {
-            sharedPreferences.reload()
-            val json = sharedPreferences.getString(methodHooksKey, null) ?: return arrayOf()
-            return Gson().fromJson(json, Array<LuaScriptHolder>::class.java) ?: return arrayOf()
-        }
-        set(value) {
-            val result = Gson().toJson(value) ?: return
-            sharedPreferences.edit(commit = true) { this.putString(methodHooksKey, result) }
-        }
+    override fun get(className: String, methodName: String): Result<Array<MethodHookHolder>> = runCatching {
+        val json = sharedPreferences.getString("$className.$methodName", null)
+            ?: throw Exception("Failed to get json from $className.$methodName")
 
-    override fun hasChanged(): Boolean
-        = sharedPreferences.hasFileChanged()
+        val hookHolders = Gson().fromJson(json, Array<LuaScriptHolder>::class.java)
+
+        hookHolders.map { it.toMethodHookHolder(logger).getOrThrow() }.toTypedArray()
+    }
+
+    override fun set(className: String, methodName: String, json: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun all(): Set<Array<LuaScriptHolder>> = run {
+        sharedPreferences.all.map { Gson().fromJson(it.value as String, Array<LuaScriptHolder>::class.java) }.toSet()
+    }
+
+    override fun reload(): Boolean {
+        if (!sharedPreferences.hasFileChanged()) return false
+
+        sharedPreferences.reload()
+
+        return true
+    }
 }
