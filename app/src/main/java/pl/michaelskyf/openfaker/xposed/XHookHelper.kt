@@ -18,7 +18,7 @@ class XHookHelper : HookHelper() {
         = runCatching { XposedHelpers.findMethodExact(className, classLoader, methodName, *parameterTypes) }
 
     override fun findMethod(
-        clazz: Class<Any>,
+        clazz: Class<*>,
         methodName: String,
         vararg parameterTypes: Class<*>
     ): Result<Method>
@@ -31,6 +31,6 @@ class XHookHelper : HookHelper() {
     override fun findField(classType: Class<*>, fieldName: String): Result<Field>
         = runCatching { XposedHelpers.findField(classType, fieldName) }
 
-    override fun findClass(className: String, classLoader: ClassLoader): Result<Class<Any>>
-        = runCatching { XposedHelpers.findClass(className, classLoader) as Class<Any> }
+    override fun findClass(className: String, classLoader: ClassLoader): Result<Class<*>>
+        = runCatching { XposedHelpers.findClass(className, classLoader) }
 }

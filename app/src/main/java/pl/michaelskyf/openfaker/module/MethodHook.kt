@@ -1,9 +1,7 @@
 package pl.michaelskyf.openfaker.module
 
-import de.robv.android.xposed.XposedBridge
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
-import pl.michaelskyf.openfaker.xposed.XMethodHookParameters
 import java.lang.reflect.Method
 
 // TODO: Thread safety
@@ -40,7 +38,7 @@ class MethodHook(
     fun hookMethods(param: LoadPackageParam) {
 
         // Classes may only be cached per-package, since specific classes may not be accessible in all packages
-        val resolvedClassCache = mutableMapOf<String, Class<Any>>()
+        val resolvedClassCache = mutableMapOf<String, Class<*>>()
 
         for (methodInfo in methodsToBeHooked) {
             try {
@@ -53,7 +51,9 @@ class MethodHook(
                     resolvedClassCache.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
                 }.toTypedArray()
 
-                val method = hookHelper.findMethod(className, classLoader, methodName, *argumentTypes).getOrThrow()
+                val classToHookMethodFrom = resolvedClassCache.getOrPut(className) { hookHelper.findClass(className, classLoader).getOrThrow() }
+                val method = hookHelper.findMethod(classToHookMethodFrom, methodName, *argumentTypes).getOrThrow()
+
                 hookHelper.hookMethod(method, Handler())
             } catch (exception: Exception) {
                 logger.log(exception.toString())

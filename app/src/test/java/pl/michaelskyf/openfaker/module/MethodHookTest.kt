@@ -15,11 +15,11 @@ import java.lang.reflect.Method
 class MethodHookTest {
     class TestLogger: Logger() {
         override fun log(tag: String, message: String) {
-            // println("$tag $message")
+            println("$tag $message")
         }
 
         override fun log(message: String) {
-            // println(message)
+            println(message)
         }
     }
 
@@ -43,6 +43,11 @@ class MethodHookTest {
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val matchingArgumentsInfo = mockk<MatchingArgumentsInfo>()
 
+        class TestClass { fun firstMethod() {} }
+        class TestClassOther { fun firstMethod() {} }
+        val firstMethod = TestClass::class.java.methods.first()
+        val secondMethod = TestClass::class.java.methods[1]
+
         val methodHookHolders = setOf(
             MethodHookHolder("some.class", "someMethod", arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
             MethodHookHolder("some.class", "someMethod", arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
@@ -50,22 +55,24 @@ class MethodHookTest {
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
-        class TestClass { fun firstMethod() {} fun secondMethod() {} }
+
 
         every { fakerModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
         every { matchingArgumentsInfo.exactMatchArguments } returns mutableListOf()
         every { matchingArgumentsInfo.customArgumentMatchingFunctions } returns mutableListOf()
 
-        every { hookHelper.findMethod("some.class", any(), any(), *anyVararg()) } returns runCatching { TestClass::class.java.methods[0] }
-        every { hookHelper.findMethod("some.other.class", any(), any(), *anyVararg()) } returns runCatching { TestClass::class.java.methods[1] }
+        every { hookHelper.findClass("some.class", any()) } returns runCatching { TestClass::class.java }
+        every { hookHelper.findClass("some.other.class", any()) } returns runCatching { TestClassOther::class.java }
+        every { hookHelper.findMethod(TestClass::class.java, any(), *arrayOf()) } returns runCatching { firstMethod }
+        every { hookHelper.findMethod(TestClassOther::class.java, any(), *arrayOf()) } returns runCatching { secondMethod }
         every { hookHelper.hookMethod(any(), any()) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
-        verify(exactly = 1) { hookHelper.hookMethod(TestClass::class.java.methods[0], any()) }
-        verify(exactly = 1) { hookHelper.hookMethod(TestClass::class.java.methods[1], any()) }
+        verify(exactly = 1) { hookHelper.hookMethod(firstMethod, any()) }
+        verify(exactly = 1) { hookHelper.hookMethod(secondMethod, any()) }
     }
 
     @Test
@@ -89,14 +96,16 @@ class MethodHookTest {
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
         val method = TestClass::class.java.methods[0]
+        val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder(className, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findClass(className, any()) } returns runCatching { TestClass::class.java }
+        every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -132,6 +141,7 @@ class MethodHookTest {
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
         val method = TestClass::class.java.methods[0]
+        val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
             MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
@@ -139,7 +149,8 @@ class MethodHookTest {
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findClass(className, any()) } returns runCatching { TestClass::class.java }
+        every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -175,14 +186,16 @@ class MethodHookTest {
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
         val method = TestClass::class.java.methods[0]
+        val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
+            MethodHookHolder(className, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findClass(className, any()) } returns runCatching { TestClass::class.java }
+        every { hookHelper.findMethod(any(), any(), *arrayOf()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -217,14 +230,16 @@ class MethodHookTest {
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
         val method = TestClass::class.java.methods[0]
+        val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
+            MethodHookHolder(className, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
-        every { hookHelper.findMethod(any(String::class), any(), any(), *anyVararg()) } returns runCatching { method }
+        every { hookHelper.findClass(className, any()) } returns runCatching { TestClass::class.java }
+        every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
         val methodHook = MethodHook(hookHelper, logger)
@@ -247,13 +262,14 @@ class MethodHookTest {
         class TestClass { fun validMethod() {} }
         val method = TestClass::class.java.methods.first()
 
+        every { hookHelper.findClass("valid.class", any()) } returns runCatching { TestClass::class.java }
         every { hookHelper.findClass("InvalidType", any()) } throws
                 Exception("Class not found")
         every { hookHelper.findClass(String::class.java.name, any()) } returns
-                runCatching { String::class.java as Class<Any> }
-        every { hookHelper.findMethod("valid.class", any(), "invalidMethod") } throws
+                runCatching { String::class.java }
+        every { hookHelper.findMethod(any(), "invalidMethod") } throws
                 Exception("Method not found")
-        every { hookHelper.findMethod("valid.class", any(), "validMethod", *varargAny { it == String::class.java }) } returns
+        every { hookHelper.findMethod(any(), "validMethod", *arrayOf(String::class.java)) } returns
                 runCatching { method }
         every { hookHelper.hookMethod(any(), any()) } just runs
 
