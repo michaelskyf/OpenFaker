@@ -57,7 +57,7 @@ class MethodHookHandler private constructor(
     }
 
     private fun reloadRegistries(): Result<Unit> = runCatching {
-        if (fakerData.reload()) return@runCatching
+        if (!fakerData.reload()) return@runCatching
 
         fakerRegistries = loadRegistries(className, methodName, fakerData, logger).getOrThrow()
     }

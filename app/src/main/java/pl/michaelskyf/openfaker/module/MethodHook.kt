@@ -42,7 +42,7 @@ class MethodHook(
                 val classToHookMethodFrom = resolvedClassCache.getOrPut(className) { hookHelper.findClass(className, classLoader).getOrThrow() }
                 val method = hookHelper.findMethod(classToHookMethodFrom, methodName, *argumentTypes).getOrThrow()
 
-                hookHelper.hookMethod(method, MethodHookHandler(className, methodName, logger, false, fakerData).getOrThrow())
+                hookHelper.hookMethod(method, MethodHookHandler(className, methodName, logger, true, fakerData).getOrThrow())
             } catch (exception: Exception) {
                 logger.log(exception.toString())
             }

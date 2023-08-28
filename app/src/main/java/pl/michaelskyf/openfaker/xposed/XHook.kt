@@ -19,7 +19,7 @@ class XHook : IXposedHookLoadPackage {
 
             logger.log("OpenFaker: New app: " + lpparam.packageName)
 
-            reloadHooks()
+            reloadHooks().getOrElse { logger.log(it.toString()) }
 
             val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
             methodHook.hookMethods(param)
@@ -27,7 +27,6 @@ class XHook : IXposedHookLoadPackage {
     }
 
     private fun reloadHooks(): Result<Unit> = runCatching {
-        logger.log("Reloading")
         val newMethodHooks = mutableListOf<MethodHookHolder>()
         moduleData.all().map { it.forEach { script -> newMethodHooks.add(script.toMethodHookHolder(logger).getOrThrow()) } }
 

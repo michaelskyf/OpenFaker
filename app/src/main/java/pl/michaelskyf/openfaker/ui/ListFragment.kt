@@ -49,6 +49,7 @@ class ListFragment : Fragment() {
                 local method = hookParameters:getMethod()
                 
                 local result = method:invoke(obj, {"/sdcard/Music/WakacyjnaMilosc.opus"})
+                logger:log("Hi")
                 hookParameters:setResult(result)
                 
                 return true
@@ -56,6 +57,7 @@ class ListFragment : Fragment() {
         """.trimIndent()
 
         fakerData[MediaPlayer::class.java.name, "setDataSource"] = Gson().toJson(
+            arrayOf(
                 LuaScriptHolder(
                     MediaPlayer::class.java.name,
                     "setDataSource",
@@ -64,6 +66,7 @@ class ListFragment : Fragment() {
                     0,
                     MethodHookHolder.WhenToHook.Before
                 )
+            )
         )
     }
 
