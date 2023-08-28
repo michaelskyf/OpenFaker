@@ -9,4 +9,5 @@ abstract class FakerData {
 
     val methodHooksKey = "methodHooks"
     abstract var methodHooks: Array<LuaScriptHolder>
+    abstract fun hasChanged(): Boolean
 }

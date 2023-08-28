@@ -26,12 +26,15 @@ class XFakerData private constructor(
 
     override var methodHooks: Array<LuaScriptHolder>
         get() {
+            sharedPreferences.reload()
             val json = sharedPreferences.getString(methodHooksKey, null) ?: return arrayOf()
             return Gson().fromJson(json, Array<LuaScriptHolder>::class.java) ?: return arrayOf()
         }
-
         set(value) {
             val result = Gson().toJson(value) ?: return
             sharedPreferences.edit(commit = true) { this.putString(methodHooksKey, result) }
         }
+
+    override fun hasChanged(): Boolean
+        = sharedPreferences.hasFileChanged()
 }

@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.module
 
+import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import pl.michaelskyf.openfaker.xposed.ClassMethodPair
 import java.lang.reflect.Method
@@ -7,6 +8,7 @@ import java.lang.reflect.Method
 // TODO: Thread safety
 class MethodHook(
     private val hookHelper: HookHelper,
+    private val fakerData: FakerData,
     private val logger: Logger
     ) {
     private data class MethodHookInfo(val className: String, val methodName: String, val argumentTypes: Array<String>)
@@ -65,6 +67,8 @@ class MethodHook(
 
         override fun beforeHookedMethod(hookParameters: MethodHookParameters) {
 
+            reloadHooks()
+
             val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.first
                 ?: return
 
@@ -72,6 +76,8 @@ class MethodHook(
         }
 
         override fun afterHookedMethod(hookParameters: MethodHookParameters) {
+
+            reloadHooks()
 
             val moduleRegistry = fakerRegistries[Pair(hookParameters.method.declaringClass.name, hookParameters.method.name)]?.second
                 ?: return
@@ -93,6 +99,14 @@ class MethodHook(
 
                 result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
+        }
+    }
+
+    private fun reloadHooks(): Result<Unit> = runCatching {
+        if (fakerData.hasChanged()) {
+            val newMethodHooks = fakerData.methodHooks.map { it.toMethodHookHolder(logger).getOrThrow() }
+
+            reloadMethodHooks(newMethodHooks.toSet())
         }
     }
 

@@ -51,7 +51,6 @@ class ListFragment : Fragment() {
                 local method = hookParameters:getMethod()
                 
                 local result = method:invoke(obj, {"/sdcard/Music/WakacyjnaMilosc.opus"})
-                
                 hookParameters:setResult(result)
                 
                 return true

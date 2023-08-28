@@ -33,4 +33,9 @@ class UIFakerData private constructor(
             val result = Gson().toJson(value) ?: return
             sharedPreferences.edit(commit = true) { this.putString(methodHooksKey, result) }
         }
+
+    override fun hasChanged(): Boolean {
+        // I don't think this is needed for the ui
+        return false
+    }
 }

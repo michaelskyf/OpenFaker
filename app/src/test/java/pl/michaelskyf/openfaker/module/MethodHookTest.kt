@@ -9,6 +9,8 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import pl.michaelskyf.openfaker.lua.LuaFakerModule
+import pl.michaelskyf.openfaker.lua.LuaScriptHolder
+import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import java.lang.reflect.Method
 
@@ -29,7 +31,6 @@ class MethodHookTest {
         override fun invoke(thisObject: Any?, vararg arguments: Any?) {
             method.invoke(thisObject, arguments)
         }
-
     }
 
     class TestHookParameters(method: Method, private var methodArguments: Array<Any?> = arrayOf()): MethodHookParameters(null, TestMethodWrapper(method)) {
@@ -43,7 +44,15 @@ class MethodHookTest {
             set(value) { methodResult = value }
     }
 
+    private class TestFakerData: FakerData() {
+        override var methodHooks: Array<LuaScriptHolder>
+            get() = TODO("Not yet implemented")
+            set(value) {}
 
+        override fun hasChanged(): Boolean
+            = false
+
+    }
 
     @Test
     fun `hookMethods() should hook all distinct methods contained in methodsToBeHooked`() {
@@ -76,7 +85,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(TestClassOther::class.java, any(), *arrayOf()) } returns runCatching { secondMethod }
         every { hookHelper.hookMethod(any(), any()) } just runs
 
-        val methodHook = MethodHook(hookHelper, logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -117,7 +126,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -162,7 +171,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -207,7 +216,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any(), *arrayOf()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -251,7 +260,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -266,7 +275,7 @@ class MethodHookTest {
     @Test
     fun `hookMethods() should not throw any exception when hooking functions`() {
         val hookHelper = mockk<HookHelper>()
-        val methodHook = MethodHook(hookHelper, logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
 
         class TestClass { fun validMethod() {} }
         val method = TestClass::class.java.methods.first()
