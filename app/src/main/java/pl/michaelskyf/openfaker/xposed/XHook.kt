@@ -15,8 +15,8 @@ typealias ClassMethodPair = Pair<String, String>
 
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    private val hookHelper = XHookHelper()
     private val logger = XLogger()
+    private val hookHelper = XHookHelper(logger)
     private val moduleData = XFakerData()
     private val methodHook = MethodHook(hookHelper, logger)
 

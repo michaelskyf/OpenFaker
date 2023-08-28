@@ -83,7 +83,7 @@ class MethodHook(
             val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
 
             for (module in matchingModules) {
-                val hookParametersCopy = TemporaryMethodHookParameters(hookParameters.method, hookParameters.arguments.clone(), hookParameters.result)
+                val hookParametersCopy = TemporaryMethodHookParameters(hookParameters)
                 val result = module.run(hookParametersCopy)
                 if (result.getOrDefault(false)) {
                     hookParameters.result = hookParametersCopy.result
@@ -94,11 +94,20 @@ class MethodHook(
                 result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
         }
+    }
 
-        private inner class TemporaryMethodHookParameters(
-            override val method: Method,
-            override var arguments: Array<Any?>,
-            override var result: Any?
-        ): MethodHookParameters(method)
+    private class TemporaryMethodHookParameters private constructor(
+        override val thisObject: Any?,
+        override val method: MethodWrapper,
+        override var arguments: Array<Any?>,
+        override var result: Any?,
+        override var logger: Logger
+    ): MethodHookParameters(thisObject, method, logger) {
+
+        companion object {
+            operator fun invoke(methodHookParameters: MethodHookParameters): TemporaryMethodHookParameters
+                = TemporaryMethodHookParameters(methodHookParameters.thisObject, methodHookParameters.method,
+                    methodHookParameters.arguments.clone(), methodHookParameters.result, methodHookParameters.logger)
+        }
     }
 }

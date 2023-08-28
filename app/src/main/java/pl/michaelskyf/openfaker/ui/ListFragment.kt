@@ -2,6 +2,7 @@ package pl.michaelskyf.openfaker.ui
 
 import android.R
 import android.content.ContentResolver
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.Settings.Secure
 import androidx.fragment.app.Fragment
@@ -41,21 +42,28 @@ class ListFragment : Fragment() {
 
         val lua = """
             function registerModule(moduleRegistry)
-                moduleRegistry:exactMatchArguments({argument:ignore(), argument:require("android_id")})
+                moduleRegistry:exactMatchArguments({argument:ignore()})
             end
             
             function runModule(hookParameters)
                 local arguments = hookParameters:getArguments()
+                local obj = hookParameters:getThisObject()
+                local method = hookParameters:getMethod()
+                local logger = hookParameters:getLogger()
                 
-                hookParameters:setResult("Fake value set by the script")
+                local result = method:invoke(obj, {"/sdcard/Music/WakacyjnaMilosc.opus"})
+                
+                hookParameters:setResult(result)
+                
                 return true
             end
         """.trimIndent()
+
         fakerData.methodHooks = arrayOf(
             LuaScriptHolder(
-                Secure::class.java.name,
-                "getString",
-                arrayOf(ContentResolver::class.java.name, String::class.java.name),
+                MediaPlayer::class.java.name,
+                "setDataSource",
+                arrayOf(String::class.java.name),
                 lua,
                 0,
                 MethodHookHolder.WhenToHook.Before)

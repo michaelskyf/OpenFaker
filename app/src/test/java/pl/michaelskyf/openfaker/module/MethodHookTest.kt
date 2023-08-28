@@ -23,7 +23,16 @@ class MethodHookTest {
         }
     }
 
-    class TestHookParameters(method: Method, private var methodArguments: Array<Any?> = arrayOf()): MethodHookParameters(method) {
+    private val logger = TestLogger()
+
+    class TestMethodWrapper(method: Method): MethodWrapper(method) {
+        override fun invoke(thisObject: Any?, vararg arguments: Any?) {
+            method.invoke(thisObject, arguments)
+        }
+
+    }
+
+    class TestHookParameters(method: Method, private var methodArguments: Array<Any?> = arrayOf()): MethodHookParameters(null, TestMethodWrapper(method), TestLogger()) {
 
         private var methodResult: Any? = null
         override var arguments: Array<Any?>
@@ -34,7 +43,7 @@ class MethodHookTest {
             set(value) { methodResult = value }
     }
 
-    private val logger = TestLogger()
+
 
     @Test
     fun `hookMethods() should hook all distinct methods contained in methodsToBeHooked`() {
