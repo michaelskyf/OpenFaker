@@ -16,7 +16,7 @@ typealias ClassMethodPair = Pair<String, String>
 class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private val logger = XLogger()
-    private val hookHelper = XHookHelper(logger)
+    private val hookHelper = XHookHelper()
     private val moduleData = XFakerData()
     private val methodHook = MethodHook(hookHelper, logger)
 
@@ -48,7 +48,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         logger.log("OpenFaker: Initializing")
 
-        val methodHooks = moduleData.methodHooks.map { it.toMethodHookHolder().getOrThrow() }
+        val methodHooks = moduleData.methodHooks.map { it.toMethodHookHolder(logger).getOrThrow() }
         methodHook.reloadMethodHooks(methodHooks.toSet())
     }
 
@@ -57,7 +57,7 @@ class XHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             logger.log("OpenFaker: Reloading preferences")
 
-            val methodHooks = moduleData.methodHooks.map { it.toMethodHookHolder().getOrThrow() }
+            val methodHooks = moduleData.methodHooks.map { it.toMethodHookHolder(logger).getOrThrow() }
             methodHook.reloadMethodHooks(methodHooks.toSet())
         }
     }

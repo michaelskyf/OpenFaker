@@ -8,7 +8,7 @@ import pl.michaelskyf.openfaker.module.MethodHookHandler
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 
-class XHookHelper(private val logger: Logger) : HookHelper() {
+class XHookHelper() : HookHelper() {
 
     override fun findMethod(
         className: String,
@@ -26,7 +26,7 @@ class XHookHelper(private val logger: Logger) : HookHelper() {
             = runCatching { XposedHelpers.findMethodExact(clazz, methodName, *parameterTypes) }
 
     override fun hookMethod(method: Method, callback: MethodHookHandler) {
-        XposedBridge.hookMethod(method, XMethodHookHandler(callback, logger))
+        XposedBridge.hookMethod(method, XMethodHookHandler(callback))
     }
 
     override fun findField(classType: Class<*>, fieldName: String): Result<Field>

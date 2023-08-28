@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.Test
 import pl.michaelskyf.openfaker.module.FunctionArgument
+import pl.michaelskyf.openfaker.module.Logger
 import pl.michaelskyf.openfaker.module.MethodHookParameters
 
 class LuaFakerModuleTest {
@@ -13,13 +14,15 @@ class LuaFakerModuleTest {
 
     }
 
+    private val logger = mockk<Logger>()
+
     @Test
     fun `constructor should return failure when lua module doesn't contain registerModule()`() {
         val lua = """
             function runModule(hookParameters)
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         assert(module.isFailure)
     }
@@ -31,7 +34,7 @@ class LuaFakerModuleTest {
                 local x = 1
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         assert(module.isFailure)
     }
@@ -45,7 +48,7 @@ class LuaFakerModuleTest {
             function runModule(hookParameters)
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         assert(module.isSuccess)
     }
@@ -58,7 +61,7 @@ class LuaFakerModuleTest {
             function runModule(hookParameters)
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         assert(module.isFailure)
     }
@@ -71,7 +74,7 @@ class LuaFakerModuleTest {
             
             runModule = 10
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         assert(module.isFailure)
     }
@@ -86,7 +89,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
         val parameters = mockk<MethodHookParameters>()
 
         assert(module.getOrThrow().run(parameters).getOrThrow())
@@ -102,7 +105,7 @@ class LuaFakerModuleTest {
                 return false
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
         val parameters = mockk<MethodHookParameters>()
 
         assert(!module.getOrThrow().run(parameters).getOrThrow())
@@ -118,7 +121,7 @@ class LuaFakerModuleTest {
                 return 10
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
         val parameters = mockk<MethodHookParameters>()
 
         assert(module.getOrThrow().run(parameters).isFailure)
@@ -135,7 +138,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val result = module.getOrThrow().getMatchingArgumentsInfo()
 
@@ -153,7 +156,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val result = module.getOrThrow().getMatchingArgumentsInfo()
 
@@ -174,7 +177,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val result = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
 
@@ -205,7 +208,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val result = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
         val exact = result.exactMatchArguments
@@ -229,7 +232,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val arguments = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
         val custom = arguments.customArgumentMatchingFunctions.first()
@@ -253,7 +256,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val arguments = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
         val custom = arguments.customArgumentMatchingFunctions.first()
@@ -277,7 +280,7 @@ class LuaFakerModuleTest {
                 return true
             end
         """.trimIndent()
-        val module = LuaFakerModule(0, lua)
+        val module = LuaFakerModule(0, lua, logger)
 
         val arguments = module.getOrThrow().getMatchingArgumentsInfo().getOrThrow()
         val custom = arguments.customArgumentMatchingFunctions.first()

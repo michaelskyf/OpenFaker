@@ -32,7 +32,7 @@ class MethodHookTest {
 
     }
 
-    class TestHookParameters(method: Method, private var methodArguments: Array<Any?> = arrayOf()): MethodHookParameters(null, TestMethodWrapper(method), TestLogger()) {
+    class TestHookParameters(method: Method, private var methodArguments: Array<Any?> = arrayOf()): MethodHookParameters(null, TestMethodWrapper(method)) {
 
         private var methodResult: Any? = null
         override var arguments: Array<Any?>
@@ -100,7 +100,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript).getOrThrow()
+        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -145,7 +145,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript).getOrThrow()
+        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -190,7 +190,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript).getOrThrow()
+        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -234,7 +234,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript).getOrThrow()
+        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }

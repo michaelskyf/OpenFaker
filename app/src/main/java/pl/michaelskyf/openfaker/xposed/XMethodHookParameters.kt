@@ -7,8 +7,8 @@ import pl.michaelskyf.openfaker.module.MethodHookParameters
 import pl.michaelskyf.openfaker.module.MethodWrapper
 import java.lang.reflect.Method
 
-class XMethodHookParameters(private val param: MethodHookParam, logger: Logger)
-    : MethodHookParameters(param.thisObject, XMethodWrapper(param.method as Method), logger = logger) {
+class XMethodHookParameters(private val param: MethodHookParam)
+    : MethodHookParameters(param.thisObject, XMethodWrapper(param.method as Method)) {
 
     override var arguments: Array<Any?>
         get() = param.args

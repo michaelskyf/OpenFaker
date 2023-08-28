@@ -100,14 +100,13 @@ class MethodHook(
         override val thisObject: Any?,
         override val method: MethodWrapper,
         override var arguments: Array<Any?>,
-        override var result: Any?,
-        override var logger: Logger
-    ): MethodHookParameters(thisObject, method, logger) {
+        override var result: Any?
+    ): MethodHookParameters(thisObject, method) {
 
         companion object {
             operator fun invoke(methodHookParameters: MethodHookParameters): TemporaryMethodHookParameters
                 = TemporaryMethodHookParameters(methodHookParameters.thisObject, methodHookParameters.method,
-                    methodHookParameters.arguments.clone(), methodHookParameters.result, methodHookParameters.logger)
+                    methodHookParameters.arguments.clone(), methodHookParameters.result)
         }
     }
 }
