@@ -2,7 +2,6 @@ package pl.michaelskyf.openfaker.module
 
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
-import java.util.Optional
 
 // TODO: Thread safety
 class MethodHookHandler private constructor(
@@ -71,10 +70,9 @@ class MethodHookHandler private constructor(
             if (result.getOrDefault(false)) {
                 hookParameters.result = hookParametersCopy.result
                 hookParameters.arguments = hookParametersCopy.arguments
-                return
+            } else {
+                result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
-
-            result.exceptionOrNull()?.let { logger.log(it.toString()) }
         }
     }
 
