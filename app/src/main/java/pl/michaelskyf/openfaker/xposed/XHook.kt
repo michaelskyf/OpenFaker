@@ -15,15 +15,14 @@ class XHook : IXposedHookLoadPackage {
     private val methodHook = MethodHook(hookHelper, moduleData, logger)
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        if (lpparam.packageName != BuildConfig.APPLICATION_ID) {
+        if (lpparam.packageName == BuildConfig.APPLICATION_ID) return
 
-            logger.log("OpenFaker: New app: " + lpparam.packageName)
+        logger.log("OpenFaker: New app: " + lpparam.packageName)
 
-            reloadHooks().getOrElse { logger.log(it.toString()) }
+        reloadHooks().getOrElse { logger.log(it.toString()) }
 
-            val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
-            methodHook.hookMethods(param)
-        }
+        val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
+        methodHook.hookMethods(param)
     }
 
     private fun reloadHooks(): Result<Unit> = runCatching {
