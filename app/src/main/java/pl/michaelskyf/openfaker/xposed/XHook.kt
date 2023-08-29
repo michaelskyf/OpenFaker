@@ -27,7 +27,7 @@ class XHook : IXposedHookLoadPackage {
 
     private fun reloadHooks(): Result<Unit> = runCatching {
         val newMethodHooks = mutableListOf<MethodHookHolder>()
-        moduleData.all().map { it.forEach { holder -> newMethodHooks.add(holder) } }
+        moduleData.all().getOrThrow().map { it.forEach { holder -> newMethodHooks.add(holder) } }
 
         methodHook.reloadMethodHooks(newMethodHooks.toSet())
     }

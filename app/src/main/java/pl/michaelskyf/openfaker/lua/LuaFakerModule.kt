@@ -2,10 +2,7 @@ package pl.michaelskyf.openfaker.lua
 
 import org.luaj.vm2.Globals
 import org.luaj.vm2.LuaFunction
-import org.luaj.vm2.LuaTable
-import org.luaj.vm2.LuaValue
 import org.luaj.vm2.lib.jse.CoerceJavaToLua
-import org.luaj.vm2.lib.jse.CoerceLuaToJava
 import org.luaj.vm2.lib.jse.JsePlatform
 import pl.michaelskyf.openfaker.module.FakerModule
 import pl.michaelskyf.openfaker.module.FunctionArgument

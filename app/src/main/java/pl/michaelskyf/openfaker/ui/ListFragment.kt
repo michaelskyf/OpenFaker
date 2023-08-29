@@ -2,6 +2,7 @@ package pl.michaelskyf.openfaker.ui
 
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -56,17 +57,17 @@ class ListFragment : Fragment() {
             end
         """.trimIndent()
 
-        fakerData[MediaPlayer::class.java.name, "setDataSource"] = Gson().toJson(
-            arrayOf(
-                MethodHookHolder(
-                    MediaPlayer::class.java.name,
-                    "setDataSource",
-                    arrayOf(String::class.java.name),
-                    LuaFakerModuleHolder(lua, 0),
-                    MethodHookHolder.WhenToHook.Before
-                )
+        val result = fakerData.set(MediaPlayer::class.java.name, "setDataSource", arrayOf(
+            MethodHookHolder(
+                MediaPlayer::class.java.name,
+                "setDataSource",
+                arrayOf(String::class.java.name),
+                LuaFakerModuleHolder(lua, 0),
+                MethodHookHolder.WhenToHook.Before
             )
-        )
+        ))
+
+        Log.d("OpenFaker", result.exceptionOrNull().toString())
     }
 
     override fun onDestroyView() {

@@ -20,10 +20,6 @@ class XFakerData private constructor(private val sharedPreferences: XSharedPrefe
         }
     }
 
-    override fun all(): Set<Array<MethodHookHolder>> = run {
-        sharedPreferences.all.map { Gson().fromJson(it.value as String, Array<MethodHookHolder>::class.java) }.toSet()
-    }
-
     override fun reload(): Boolean {
         if (!sharedPreferences.hasFileChanged()) return false
 
@@ -34,4 +30,7 @@ class XFakerData private constructor(private val sharedPreferences: XSharedPrefe
 
     override fun getString(key: String): String?
         = sharedPreferences.getString(key, null)
+
+    override fun getAll(): Map<String, String>
+        = sharedPreferences.all as Map<String, String>
 }
