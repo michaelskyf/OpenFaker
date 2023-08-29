@@ -1,12 +1,10 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
-import pl.michaelskyf.openfaker.module.FakerModule
-
-open class MethodHookHolder(
+class MethodHookHolder(
     val className: String,
     val methodName: String,
     val argumentTypes: Array<String>,
-    val fakerModule: FakerModule,
+    val fakerModule: FakerModuleHolder,
     val whenToHook: WhenToHook
 ) {
     enum class WhenToHook {

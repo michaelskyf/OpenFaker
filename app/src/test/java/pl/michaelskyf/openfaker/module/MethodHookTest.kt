@@ -1,6 +1,5 @@
 package pl.michaelskyf.openfaker.module
 
-import io.mockk.InternalPlatformDsl.toArray
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -9,9 +8,9 @@ import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import pl.michaelskyf.openfaker.lua.LuaFakerModule
-import pl.michaelskyf.openfaker.lua.LuaScriptHolder
+import pl.michaelskyf.openfaker.lua.LuaFakerModuleHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
+import pl.michaelskyf.openfaker.ui_module_bridge.FakerModuleHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 import java.lang.reflect.Method
 
@@ -45,28 +44,13 @@ class MethodHookTest {
             set(value) { methodResult = value }
     }
 
-    private class TestFakerData(val methodHookHolders: Array<MethodHookHolder> = arrayOf()): FakerData() {
-        override fun get(className: String, methodName: String) = runCatching {
-            methodHookHolders
-        }
-
-        override fun set(className: String, methodName: String, json: String) {
-            TODO("Not yet implemented")
-        }
-
-        override fun all(): Set<Array<LuaScriptHolder>> {
-            TODO("Not yet implemented")
-        }
-
-        override fun reload(): Boolean {
-            return false
-        }
-    }
-
     @Test
     fun `hookMethods() should hook all distinct methods contained in methodsToBeHooked`() {
         val hookHelper = mockk<HookHelper>()
         val fakerModule = mockk<FakerModule>()
+        val fakerModuleHolder = mockk<FakerModuleHolder>()
+        every { fakerModuleHolder.toFakerModule(any()) } returns Result.success(fakerModule)
+        val fakerData = mockk<FakerData.Receiver>()
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val matchingArgumentsInfo = mockk<MatchingArgumentsInfo>()
 
@@ -76,14 +60,15 @@ class MethodHookTest {
         val secondMethod = TestClass::class.java.methods[1]
 
         val methodHookHolders = setOf(
-            MethodHookHolder("some.class", "someMethod", arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
-            MethodHookHolder("some.class", "someMethod", arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
-            MethodHookHolder("some.other.class", "someMethod", arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder("some.class", "someMethod", arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder("some.class", "someMethod", arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder("some.other.class", "someMethod", arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
 
 
+        every { fakerData[any(), any()] } returns Result.success(methodHookHolders.toTypedArray())
         every { fakerModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
         every { matchingArgumentsInfo.exactMatchArguments } returns mutableListOf()
         every { matchingArgumentsInfo.customArgumentMatchingFunctions } returns mutableListOf()
@@ -94,7 +79,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(TestClassOther::class.java, any(), *arrayOf()) } returns runCatching { secondMethod }
         every { hookHelper.hookMethod(any(), any()) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
+        val methodHook = MethodHook(hookHelper, fakerData, logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -118,7 +103,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
+        val fakerModuleHolder = LuaFakerModuleHolder(luaScript, 0)
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -126,7 +111,7 @@ class MethodHookTest {
         val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(className, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.Before),
+            MethodHookHolder(className, method.name, arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
@@ -135,7 +120,9 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(methodHookHolders.toTypedArray()), logger)
+        val fakerData = mockk<FakerData.Receiver>()
+        every { fakerData[any(), any()] } returns Result.success(methodHookHolders.toTypedArray())
+        val methodHook = MethodHook(hookHelper, fakerData, logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -163,7 +150,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
+        val fakerModuleHolder = LuaFakerModuleHolder(luaScript, 0)
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -171,7 +158,7 @@ class MethodHookTest {
         val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
+            MethodHookHolder(method.declaringClass.name, method.name, arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.After),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
@@ -180,7 +167,9 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(methodHookHolders.toTypedArray()), logger)
+        val fakerData = mockk<FakerData.Receiver>()
+        every { fakerData[any(), any()] } returns Result.success(methodHookHolders.toTypedArray())
+        val methodHook = MethodHook(hookHelper, fakerData, logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -208,7 +197,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
+        val fakerModuleHolder = LuaFakerModuleHolder(luaScript, 0)
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -216,7 +205,7 @@ class MethodHookTest {
         val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(className, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
+            MethodHookHolder(className, method.name, arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.After),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
@@ -225,7 +214,9 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any(), *arrayOf()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
+        val fakerData = mockk<FakerData.Receiver>()
+        every { fakerData[any(), any()] } returns Result.success(methodHookHolders.toTypedArray())
+        val methodHook = MethodHook(hookHelper, fakerData, logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -252,7 +243,7 @@ class MethodHookTest {
             end
         """.trimIndent()
         val hookHelper = mockk<HookHelper>()
-        val fakerModule = LuaFakerModule(0, luaScript, logger).getOrThrow()
+        val fakerModuleHolder = LuaFakerModuleHolder(luaScript, 0)
         val classLoader = this.javaClass.classLoader ?: fail("Class loader not found")
         val capturedHookHandler = slot<MethodHookHandler>()
         class TestClass { fun firstMethod() {} fun secondMethod() {} }
@@ -260,7 +251,7 @@ class MethodHookTest {
         val className = method.declaringClass.name
 
         val methodHookHolders = setOf(
-            MethodHookHolder(className, method.name, arrayOf(), fakerModule, MethodHookHolder.WhenToHook.After),
+            MethodHookHolder(className, method.name, arrayOf(), fakerModuleHolder, MethodHookHolder.WhenToHook.After),
         )
 
         val loadPackageParam = LoadPackageParam("some.package", classLoader)
@@ -269,7 +260,9 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
+        val fakerData = mockk<FakerData.Receiver>()
+        every { fakerData[any(), any()] } returns Result.success(methodHookHolders.toTypedArray())
+        val methodHook = MethodHook(hookHelper, fakerData, logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -284,7 +277,9 @@ class MethodHookTest {
     @Test
     fun `hookMethods() should not throw any exception when hooking functions`() {
         val hookHelper = mockk<HookHelper>()
-        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
+        val fakerData = mockk<FakerData.Receiver>()
+        every { fakerData[any(), any()] } returns Result.success(arrayOf())
+        val methodHook = MethodHook(hookHelper, fakerData, logger)
 
         class TestClass { fun validMethod() {} }
         val method = TestClass::class.java.methods.first()
@@ -300,18 +295,17 @@ class MethodHookTest {
                 runCatching { method }
         every { hookHelper.hookMethod(any(), any()) } just runs
 
-        val fakerModule = mockk<FakerModule>()
-        every { fakerModule.getMatchingArgumentsInfo() } returns runCatching { mockk(relaxed = true) }
+        val fakerModuleHolder = mockk<FakerModuleHolder>()
 
         val methodHookHolders = setOf(
             MethodHookHolder("valid.class", "validMethod", arrayOf(String::class.java.name),
-                fakerModule, MethodHookHolder.WhenToHook.Before),
+                fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
             MethodHookHolder("invalid.class", "validMethod", arrayOf(String::class.java.name),
-                fakerModule, MethodHookHolder.WhenToHook.Before),
+                fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
             MethodHookHolder("valid.class", "invalidMethod", arrayOf(String::class.java.name),
-                fakerModule, MethodHookHolder.WhenToHook.Before),
+                fakerModuleHolder, MethodHookHolder.WhenToHook.Before),
             MethodHookHolder("valid.class", "validMethod", arrayOf("invalidType"),
-                fakerModule, MethodHookHolder.WhenToHook.Before)
+                fakerModuleHolder, MethodHookHolder.WhenToHook.Before)
         )
         methodHook.reloadMethodHooks(methodHookHolders)
 

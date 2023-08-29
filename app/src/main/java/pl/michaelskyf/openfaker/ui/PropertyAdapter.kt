@@ -2,10 +2,7 @@ package pl.michaelskyf.openfaker.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.ContentProvider
-import android.content.ContentResolver
 import android.content.Context
-import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,8 +15,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.databinding.OptionRowBinding
-import pl.michaelskyf.openfaker.lua.LuaScriptHolder
-import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 
 class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder>()
 {

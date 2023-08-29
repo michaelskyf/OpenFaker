@@ -6,7 +6,7 @@ import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 // TODO: Thread safety
 class MethodHook(
     private val hookHelper: HookHelper,
-    private val fakerData: FakerData,
+    private val fakerData: FakerData.Receiver,
     private val logger: Logger
     ) {
     private data class MethodHookInfo(val className: String, val methodName: String, val argumentTypes: Array<String>)

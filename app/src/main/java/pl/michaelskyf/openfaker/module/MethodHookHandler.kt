@@ -9,28 +9,30 @@ class MethodHookHandler private constructor(
     private val methodName: String,
     private val logger: Logger,
     private val isDynamic: Boolean,
-    private val fakerData: FakerData,
+    private val fakerData: FakerData.Receiver,
     private var fakerRegistries: Pair<FakerModuleRegistry, FakerModuleRegistry>
     ) {
 
     companion object {
-        operator fun invoke(className: String, methodName: String, logger: Logger, isDynamic: Boolean, fakerData: FakerData): Result<MethodHookHandler> = runCatching {
-            val registries = loadRegistries(className, methodName, fakerData, logger).getOrThrow()
+        operator fun invoke(className: String, methodName: String, logger: Logger, isDynamic: Boolean, fakerData: FakerData.Receiver): Result<MethodHookHandler> = runCatching {
+            val methodHookHolders = fakerData[className, methodName].getOrThrow()
+            val registries = loadRegistries(methodHookHolders, logger).getOrThrow()
 
             MethodHookHandler(className, methodName, logger, isDynamic, fakerData, registries)
         }
 
-        private fun loadRegistries(className: String, methodName: String, fakerData: FakerData, logger: Logger)
+        private fun loadRegistries(methodHookHolders: Array<MethodHookHolder>, logger: Logger)
             : Result<Pair<FakerModuleRegistry, FakerModuleRegistry>> = runCatching {
-            val methodHookHolders = fakerData[className, methodName].getOrThrow()
             val beforeRegistry = FakerModuleRegistry()
             val afterRegistry = FakerModuleRegistry()
 
             for (holder in methodHookHolders) {
-                when (holder.whenToHook) {
-                    MethodHookHolder.WhenToHook.Before -> beforeRegistry.register(holder.fakerModule).getOrElse { logger.log(it.toString()) }
-                    MethodHookHolder.WhenToHook.After -> afterRegistry.register(holder.fakerModule).getOrElse { logger.log(it.toString()) }
+                val registry = when (holder.whenToHook) {
+                    MethodHookHolder.WhenToHook.Before -> beforeRegistry
+                    MethodHookHolder.WhenToHook.After -> afterRegistry
                 }
+
+                registry.register(holder.fakerModule.toFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
             }
 
             Pair(beforeRegistry, afterRegistry)
@@ -56,9 +58,9 @@ class MethodHookHandler private constructor(
     }
 
     private fun reloadRegistries(): Result<Unit> = runCatching {
-        if (!fakerData.reload()) return@runCatching
-
-        fakerRegistries = loadRegistries(className, methodName, fakerData, logger).getOrThrow()
+        fakerData.runIfChanged(className, methodName) {
+            fakerRegistries = loadRegistries(it, logger).getOrThrow()
+        }
     }
 
     private fun runModules(hookParameters: MethodHookParameters, moduleRegistry: FakerModuleRegistry) {

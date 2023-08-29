@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
-import pl.michaelskyf.openfaker.lua.LuaScriptHolder
+import pl.michaelskyf.openfaker.lua.LuaFakerModuleHolder
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
 
 class ListFragment : Fragment() {
@@ -58,12 +58,11 @@ class ListFragment : Fragment() {
 
         fakerData[MediaPlayer::class.java.name, "setDataSource"] = Gson().toJson(
             arrayOf(
-                LuaScriptHolder(
+                MethodHookHolder(
                     MediaPlayer::class.java.name,
                     "setDataSource",
                     arrayOf(String::class.java.name),
-                    lua,
-                    0,
+                    LuaFakerModuleHolder(lua, 0),
                     MethodHookHolder.WhenToHook.Before
                 )
             )
