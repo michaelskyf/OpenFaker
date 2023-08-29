@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.module
 
+import io.mockk.InternalPlatformDsl.toArray
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -44,9 +45,9 @@ class MethodHookTest {
             set(value) { methodResult = value }
     }
 
-    private class TestFakerData: FakerData() {
-        override fun get(className: String, methodName: String): Result<Array<MethodHookHolder>> {
-            TODO("Not yet implemented")
+    private class TestFakerData(val methodHookHolders: Array<MethodHookHolder> = arrayOf()): FakerData() {
+        override fun get(className: String, methodName: String) = runCatching {
+            methodHookHolders
         }
 
         override fun set(className: String, methodName: String, json: String) {
@@ -134,7 +135,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(methodHookHolders.toTypedArray()), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 
@@ -179,7 +180,7 @@ class MethodHookTest {
         every { hookHelper.findMethod(any(), any()) } returns runCatching { method }
         every { hookHelper.hookMethod(any(), callback = capture(capturedHookHandler)) } just runs
 
-        val methodHook = MethodHook(hookHelper, TestFakerData(), logger)
+        val methodHook = MethodHook(hookHelper, TestFakerData(methodHookHolders.toTypedArray()), logger)
         methodHook.reloadMethodHooks(methodHookHolders)
         methodHook.hookMethods(loadPackageParam)
 

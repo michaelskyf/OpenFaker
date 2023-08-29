@@ -33,19 +33,34 @@ class MethodHook(
                 val className = methodInfo.className
                 val classLoader = param.classLoader
                 val methodName = methodInfo.methodName
-                val argumentTypesStrings = methodInfo.argumentTypes
 
-                val argumentTypes = argumentTypesStrings.map {
-                    resolvedClassCache.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
-                }.toTypedArray()
+                val argumentTypes = resolveArgumentTypes(methodInfo, classLoader, resolvedClassCache).getOrThrow()
+                val declaringClass = resolveDeclaringClass(methodInfo, classLoader, resolvedClassCache).getOrThrow()
 
-                val classToHookMethodFrom = resolvedClassCache.getOrPut(className) { hookHelper.findClass(className, classLoader).getOrThrow() }
-                val method = hookHelper.findMethod(classToHookMethodFrom, methodName, *argumentTypes).getOrThrow()
-
+                val method = hookHelper.findMethod(declaringClass, methodName, *argumentTypes).getOrThrow()
                 hookHelper.hookMethod(method, MethodHookHandler(className, methodName, logger, true, fakerData).getOrThrow())
+
             } catch (exception: Exception) {
                 logger.log(exception.toString())
             }
         }
+    }
+
+    private fun resolveArgumentTypes(
+        methodInfo: MethodHookInfo,
+        classLoader: ClassLoader,
+        resolvedClassCache: MutableMap<String, Class<*>>
+    ) = runCatching {
+        methodInfo.argumentTypes.map {
+            resolvedClassCache.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
+        }.toTypedArray()
+    }
+
+    private fun resolveDeclaringClass(
+        methodInfo: MethodHookInfo,
+        classLoader: ClassLoader,
+        resolvedClassCache: MutableMap<String, Class<*>>
+    ) = runCatching {
+        resolvedClassCache.getOrPut(methodInfo.className) { hookHelper.findClass(methodInfo.className, classLoader).getOrThrow() }
     }
 }
