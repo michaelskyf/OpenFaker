@@ -1,11 +1,18 @@
 package pl.michaelskyf.openfaker.xposed
 
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.module.MethodHook
 import pl.michaelskyf.openfaker.module.LoadPackageParam
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
+import java.lang.reflect.Type
 
 class XHook : IXposedHookLoadPackage {
 

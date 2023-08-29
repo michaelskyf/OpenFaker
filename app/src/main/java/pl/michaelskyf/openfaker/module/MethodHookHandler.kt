@@ -32,7 +32,7 @@ class MethodHookHandler private constructor(
                     MethodHookHolder.WhenToHook.After -> afterRegistry
                 }
 
-                registry.register(holder.fakerModule.toFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
+                registry.register(holder.fakerModuleFactory.createFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
             }
 
             Pair(beforeRegistry, afterRegistry)
@@ -59,7 +59,7 @@ class MethodHookHandler private constructor(
 
     private fun reloadRegistries(): Result<Unit> = runCatching {
         fakerData.runIfChanged(className, methodName) {
-            fakerRegistries = loadRegistries(it, logger).getOrThrow()
+            fakerRegistries = loadRegistries(this, logger).getOrThrow()
         }
     }
 

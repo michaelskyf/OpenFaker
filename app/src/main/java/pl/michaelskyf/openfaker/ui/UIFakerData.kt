@@ -2,6 +2,7 @@ package pl.michaelskyf.openfaker.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
 
 class UIFakerData private constructor(
@@ -19,5 +20,22 @@ class UIFakerData private constructor(
         }
     }
 
-    override fun setString(key: String, value: String?) = sharedPreferences.edit().putString(key, value).commit()
+    override fun edit(action: Editor.() -> Unit) {
+        val editor = UIEditor()
+
+        action(editor)
+
+        editor.commit()
+    }
+
+    inner class UIEditor: Editor() {
+        private val editor = sharedPreferences.edit()
+
+        override fun implPutString(key: String, value: String) {
+            editor.putString(key, value)
+        }
+
+        override fun implCommit()
+            = editor.commit()
+    }
 }

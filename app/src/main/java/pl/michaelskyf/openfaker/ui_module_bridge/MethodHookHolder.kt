@@ -4,7 +4,7 @@ class MethodHookHolder(
     val className: String,
     val methodName: String,
     val argumentTypes: Array<String>,
-    val fakerModule: FakerModuleHolder,
+    val fakerModuleFactory: FakerModuleFactory,
     val whenToHook: WhenToHook
 ) {
     enum class WhenToHook {
@@ -21,7 +21,7 @@ class MethodHookHolder(
         if (className != other.className) return false
         if (methodName != other.methodName) return false
         if (!argumentTypes.contentEquals(other.argumentTypes)) return false
-        if (fakerModule != other.fakerModule) return false
+        if (fakerModuleFactory != other.fakerModuleFactory) return false
         if (whenToHook != other.whenToHook) return false
 
         return true
@@ -31,7 +31,7 @@ class MethodHookHolder(
         var result = className.hashCode()
         result = 31 * result + methodName.hashCode()
         result = 31 * result + argumentTypes.contentHashCode()
-        result = 31 * result + fakerModule.hashCode()
+        result = 31 * result + fakerModuleFactory.hashCode()
         result = 31 * result + whenToHook.hashCode()
         return result
     }

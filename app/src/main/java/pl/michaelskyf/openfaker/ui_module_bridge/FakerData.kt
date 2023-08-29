@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -7,6 +8,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
+import pl.michaelskyf.openfaker.xposed.XLogger
 import java.lang.reflect.Type
 
 
@@ -16,30 +18,52 @@ class FakerData {
     }
 
     abstract class Receiver {
+
+        private var modifiedKeys: HashSet<String> = hashSetOf()
+
         operator fun get(className: String, methodName: String): Result<Array<MethodHookHolder>> = runCatching {
-            val json = getString("$className.$methodName")
-                ?: throw Exception("Failed to get json from $className.$methodName")
+            val key = "$className.$methodName"
+            val json = getString(key)
+                ?: throw Exception("Failed to get json from $key")
 
             val gsonBuilder = GsonBuilder()
-            gsonBuilder.registerTypeAdapter(FakerModuleHolder::class.java, PropertyBasedInterfaceMarshal())
+            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
             val gson = gsonBuilder.create()
+
+            modifiedKeys.remove(key)
             gson.fromJson(json, Array<MethodHookHolder>::class.java)
         }
 
-        fun runIfChanged(className: String, methodName: String, callback: (Array<MethodHookHolder>) -> Unit) {
-            TODO("runIfChanged")
+        fun runIfChanged(className: String, methodName: String, callback: Array<MethodHookHolder>.() -> Unit) = runCatching {
+            reload()
+
+            val key = "$className.$methodName"
+
+            if (modifiedKeys.contains(key)) {
+                callback(get(className, methodName).getOrThrow())
+                modifiedKeys.remove(key)
+            }
         }
 
         fun all(): Result<Set<Array<MethodHookHolder>>> = runCatching {
             val gsonBuilder = GsonBuilder()
-            gsonBuilder.registerTypeAdapter(FakerModuleHolder::class.java, PropertyBasedInterfaceMarshal())
+            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
             val gson = gsonBuilder.create()
 
-            getAll().map { gson.fromJson(it.value, Array<MethodHookHolder>::class.java) }.toSet()
+            modifiedKeys.clear()
+            getAll().filterKeys { it != "modifiedKeys" }.map { gson.fromJson(it.value, Array<MethodHookHolder>::class.java) }.toSet()
         }
 
+        fun reload() {
+            if (!implReload()) return
 
-        abstract fun reload(): Boolean
+            val json = getString("modifiedKeys") ?: return
+            val newModifiedKeys = Gson().fromJson(json, Array<String>::class.java)
+
+            modifiedKeys.addAll(newModifiedKeys)
+        }
+
+        abstract fun implReload(): Boolean
         protected abstract fun getString(key: String): String?
         protected abstract fun getAll(): Map<String, String>
     }
@@ -48,15 +72,37 @@ class FakerData {
         operator fun set(className: String, methodName: String, methodHookHolders: Array<MethodHookHolder>): Result<Unit> = runCatching {
 
             val gsonBuilder = GsonBuilder()
-            gsonBuilder.registerTypeAdapter(FakerModuleHolder::class.java, PropertyBasedInterfaceMarshal())
+            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
             val gson = gsonBuilder.create()
 
             val json = gson.toJson(methodHookHolders)
 
-            setString("$className.$methodName", json)
+            edit {
+                this.putString("$className.$methodName", json)
+            }
         }
 
-        protected abstract fun setString(key: String, value: String?): Boolean
+        abstract fun edit(action: Editor.() -> Unit)
+        abstract class Editor {
+            private val modifiedKeys = mutableSetOf<String>()
+
+            fun putString(key: String, value: String): Editor {
+                modifiedKeys.add(key)
+                implPutString(key, value)
+
+                return this
+            }
+
+            fun commit(): Boolean {
+                val json = Gson().toJson(modifiedKeys.toTypedArray())
+                implPutString("modifiedKeys", json)
+
+                return implCommit()
+            }
+
+            protected abstract fun implPutString(key: String, value: String)
+            protected abstract fun implCommit(): Boolean
+        }
     }
 
     // https://stackoverflow.com/questions/3629596/deserializing-an-abstract-class-in-gson Thank you very much! :)
