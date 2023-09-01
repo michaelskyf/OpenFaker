@@ -1,35 +1,35 @@
 package pl.michaelskyf.openfaker.module
 
-import pl.michaelskyf.openfaker.ui_module_bridge.FakerData
-import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
+import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
+import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 
 // TODO: Thread safety
-class MethodHookHandler private constructor(
+class HookHandler private constructor(
     private val className: String,
     private val methodName: String,
     private val logger: Logger,
     private val isDynamic: Boolean,
-    private val fakerData: FakerData.Receiver,
+    private val dataTunnel: DataTunnel.Receiver,
     private var fakerRegistries: Pair<FakerModuleRegistry, FakerModuleRegistry>
     ) {
 
     companion object {
-        operator fun invoke(className: String, methodName: String, logger: Logger, isDynamic: Boolean, fakerData: FakerData.Receiver): Result<MethodHookHandler> = runCatching {
-            val methodHookHolders = fakerData[className, methodName].getOrThrow()
+        operator fun invoke(className: String, methodName: String, logger: Logger, isDynamic: Boolean, dataTunnel: DataTunnel.Receiver): Result<HookHandler> = runCatching {
+            val methodHookHolders = dataTunnel[className, methodName].getOrThrow()
             val registries = loadRegistries(methodHookHolders, logger).getOrThrow()
 
-            MethodHookHandler(className, methodName, logger, isDynamic, fakerData, registries)
+            HookHandler(className, methodName, logger, isDynamic, dataTunnel, registries)
         }
 
-        private fun loadRegistries(methodHookHolders: Array<MethodHookHolder>, logger: Logger)
+        private fun loadRegistries(hookData: Array<HookData>, logger: Logger)
             : Result<Pair<FakerModuleRegistry, FakerModuleRegistry>> = runCatching {
             val beforeRegistry = FakerModuleRegistry()
             val afterRegistry = FakerModuleRegistry()
 
-            for (holder in methodHookHolders) {
+            for (holder in hookData) {
                 val registry = when (holder.whenToHook) {
-                    MethodHookHolder.WhenToHook.Before -> beforeRegistry
-                    MethodHookHolder.WhenToHook.After -> afterRegistry
+                    HookData.WhenToHook.Before -> beforeRegistry
+                    HookData.WhenToHook.After -> afterRegistry
                 }
 
                 registry.register(holder.fakerModuleFactory.createFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
@@ -58,7 +58,7 @@ class MethodHookHandler private constructor(
     }
 
     private fun reloadRegistries(): Result<Unit> = runCatching {
-        fakerData.runIfChanged(className, methodName) {
+        dataTunnel.runIfChanged(className, methodName) {
             fakerRegistries = loadRegistries(this, logger).getOrThrow()
         }
     }

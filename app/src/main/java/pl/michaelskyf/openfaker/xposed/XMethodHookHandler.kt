@@ -1,17 +1,16 @@
 package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.XC_MethodHook
-import pl.michaelskyf.openfaker.module.Logger
-import pl.michaelskyf.openfaker.module.MethodHookHandler
+import pl.michaelskyf.openfaker.module.HookHandler
 
-class XMethodHookHandler(private val methodHookHandler: MethodHookHandler): XC_MethodHook() {
+class XMethodHookHandler(private val hookHandler: HookHandler): XC_MethodHook() {
     override fun beforeHookedMethod(param: MethodHookParam) {
 
-        methodHookHandler.beforeHookedMethod(XMethodHookParameters(param))
+        hookHandler.beforeHookedMethod(XMethodHookParameters(param))
     }
 
     override fun afterHookedMethod(param: MethodHookParam) {
 
-        methodHookHandler.afterHookedMethod(XMethodHookParameters(param))
+        hookHandler.afterHookedMethod(XMethodHookParameters(param))
     }
 }

@@ -1,8 +1,6 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
-class MethodHookHolder(
-    val className: String,
-    val methodName: String,
+class HookData(
     val argumentTypes: Array<String>,
     val fakerModuleFactory: FakerModuleFactory,
     val whenToHook: WhenToHook
@@ -16,10 +14,8 @@ class MethodHookHolder(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as MethodHookHolder
+        other as HookData
 
-        if (className != other.className) return false
-        if (methodName != other.methodName) return false
         if (!argumentTypes.contentEquals(other.argumentTypes)) return false
         if (fakerModuleFactory != other.fakerModuleFactory) return false
         if (whenToHook != other.whenToHook) return false
@@ -28,9 +24,7 @@ class MethodHookHolder(
     }
 
     override fun hashCode(): Int {
-        var result = className.hashCode()
-        result = 31 * result + methodName.hashCode()
-        result = 31 * result + argumentTypes.contentHashCode()
+        var result = argumentTypes.contentHashCode()
         result = 31 * result + fakerModuleFactory.hashCode()
         result = 31 * result + whenToHook.hashCode()
         return result

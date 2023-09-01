@@ -3,12 +3,11 @@ package pl.michaelskyf.openfaker.xposed
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import pl.michaelskyf.openfaker.module.HookHelper
-import pl.michaelskyf.openfaker.module.Logger
-import pl.michaelskyf.openfaker.module.MethodHookHandler
+import pl.michaelskyf.openfaker.module.HookHandler
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 
-class XHookHelper() : HookHelper() {
+class XHookHelper() : HookHelper {
 
     override fun findMethod(
         className: String,
@@ -25,7 +24,7 @@ class XHookHelper() : HookHelper() {
     ): Result<Method>
             = runCatching { XposedHelpers.findMethodExact(clazz, methodName, *parameterTypes) }
 
-    override fun hookMethod(method: Method, callback: MethodHookHandler) {
+    override fun hookMethod(method: Method, callback: HookHandler) {
         XposedBridge.hookMethod(method, XMethodHookHandler(callback))
     }
 

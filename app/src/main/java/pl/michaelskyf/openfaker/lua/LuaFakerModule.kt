@@ -13,11 +13,9 @@ import java.util.Optional
 
 class LuaFakerModule private constructor(
     priority: Int,
-    private val globals: Globals,
     private val runModule: LuaFunction,
-    private val registerModule: LuaFunction,
-    logger: Logger
-) : FakerModule(priority, logger) {
+    private val registerModule: LuaFunction
+) : FakerModule(priority) {
 
     companion object {
         operator fun invoke(priority: Int, luaSource: String, logger: Logger): Result<FakerModule>
@@ -30,7 +28,7 @@ class LuaFakerModule private constructor(
                 val registerModule = globals.get("registerModule").checkfunction()
                 val runModule = globals.get("runModule").checkfunction()
 
-                LuaFakerModule(priority, globals, runModule, registerModule, logger)
+                LuaFakerModule(priority, runModule, registerModule)
             }
     }
 

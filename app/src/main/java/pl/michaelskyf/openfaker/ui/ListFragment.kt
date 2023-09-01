@@ -1,22 +1,14 @@
 package pl.michaelskyf.openfaker.ui
 
-import android.app.ActivityManager
-import android.content.ComponentName
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.media.MediaPlayer
-import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
 import pl.michaelskyf.openfaker.lua.LuaFakerModuleFactory
-import pl.michaelskyf.openfaker.ui_module_bridge.MethodHookHolder
+import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 
 class ListFragment : Fragment() {
 
@@ -117,12 +109,10 @@ class ListFragment : Fragment() {
         """.trimIndent()
 
         val result = fakerData.set("com.android.systemui.statusbar.phone.KeyguardBottomAreaView", "launchCamera", arrayOf(
-            MethodHookHolder(
-                "com.android.systemui.statusbar.phone.KeyguardBottomAreaView",
-                "launchCamera",
+            HookData(
                 arrayOf(String::class.java.name),
                 LuaFakerModuleFactory(lua, 0),
-                MethodHookHolder.WhenToHook.Before
+                HookData.WhenToHook.Before
             )
         ))
 
@@ -141,12 +131,10 @@ class ListFragment : Fragment() {
             end
         """.trimIndent()
         fakerData.set(activity, "onCreate", arrayOf(
-            MethodHookHolder(
-                activity,
-                "onCreate",
+            HookData(
                 arrayOf(Bundle::class.java.name),
                 LuaFakerModuleFactory(lua2, 0),
-                MethodHookHolder.WhenToHook.Before
+                HookData.WhenToHook.Before
             )
         ))
 
