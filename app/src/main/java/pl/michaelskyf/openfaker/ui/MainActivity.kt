@@ -1,6 +1,8 @@
 package pl.michaelskyf.openfaker.ui
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.UserHandle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -19,6 +21,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setShowWhenLocked(true)
+
+        startActivity(this.intent)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
