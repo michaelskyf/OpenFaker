@@ -3,8 +3,7 @@ package pl.michaelskyf.openfaker.module
 import pl.michaelskyf.openfaker.module.FakerModule
 import pl.michaelskyf.openfaker.module.FunctionArgument
 
-abstract class MatchingArgumentsInfo {
-
-    val exactMatchArguments = mutableListOf<Array<out FunctionArgument>>()
-    val customArgumentMatchingFunctions = mutableListOf<FakerModule.FakerArgumentCheckerFunction>()
-}
+data class MatchingArgumentsInfo(
+    val exactMatchArguments: MutableList<Array<out FunctionArgument>>,
+    val customArgumentMatchingFunctions: MutableList<FakerModule.FakerArgumentCheckerFunction>
+    )

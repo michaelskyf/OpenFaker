@@ -5,28 +5,35 @@ import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 
 // TODO: Thread safety
 class HookHandler private constructor(
+    private val packageName: String,
     private val className: String,
     private val methodName: String,
     private val logger: Logger,
-    private val isDynamic: Boolean,
     private val dataTunnel: DataTunnel.Receiver,
     private var fakerRegistries: Pair<FakerModuleRegistry, FakerModuleRegistry>
     ) {
 
     companion object {
-        operator fun invoke(className: String, methodName: String, logger: Logger, isDynamic: Boolean, dataTunnel: DataTunnel.Receiver): Result<HookHandler> = runCatching {
+        operator fun invoke(
+            packageName: String,
+            className: String,
+            methodName: String,
+            logger: Logger,
+            dataTunnel: DataTunnel.Receiver
+        ): Result<HookHandler> = runCatching {
             val methodHookHolders = dataTunnel[className, methodName].getOrThrow()
-            val registries = loadRegistries(methodHookHolders, logger).getOrThrow()
+            val registries = loadRegistries(packageName, methodHookHolders, logger).getOrThrow()
 
-            HookHandler(className, methodName, logger, isDynamic, dataTunnel, registries)
+            HookHandler(packageName, className, methodName, logger, dataTunnel, registries)
         }
 
-        private fun loadRegistries(hookData: Array<HookData>, logger: Logger)
+        private fun loadRegistries(packageName: String, hookData: Array<HookData>, logger: Logger)
             : Result<Pair<FakerModuleRegistry, FakerModuleRegistry>> = runCatching {
             val beforeRegistry = FakerModuleRegistry()
             val afterRegistry = FakerModuleRegistry()
 
-            for (holder in hookData) {
+            val hooks = hookData.filter { it.whichPackages.isMatching(packageName) }
+            for (holder in hooks) {
                 val registry = when (holder.whenToHook) {
                     HookData.WhenToHook.Before -> beforeRegistry
                     HookData.WhenToHook.After -> afterRegistry
@@ -41,7 +48,7 @@ class HookHandler private constructor(
 
     fun beforeHookedMethod(hookParameters: MethodHookParameters) {
 
-        if (isDynamic) reloadRegistries().getOrElse { logger.log(it.toString()) }
+        updateRegistries()
 
         val moduleRegistry = fakerRegistries.first
 
@@ -50,17 +57,17 @@ class HookHandler private constructor(
 
     fun afterHookedMethod(hookParameters: MethodHookParameters) {
 
-        if (isDynamic) reloadRegistries().getOrElse { logger.log(it.toString()) }
+        updateRegistries()
 
         val moduleRegistry = fakerRegistries.second
 
         runModules(hookParameters, moduleRegistry)
     }
 
-    private fun reloadRegistries(): Result<Unit> = runCatching {
+    private fun updateRegistries() {
         dataTunnel.runIfChanged(className, methodName) {
-            fakerRegistries = loadRegistries(this, logger).getOrThrow()
-        }
+            fakerRegistries = loadRegistries(packageName, this, logger).getOrThrow()
+        }.onFailure { logger.log(it.toString()) }
     }
 
     private fun runModules(hookParameters: MethodHookParameters, moduleRegistry: FakerModuleRegistry) {

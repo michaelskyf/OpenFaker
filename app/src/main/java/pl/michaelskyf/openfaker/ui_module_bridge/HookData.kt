@@ -1,10 +1,22 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
 class HookData(
+    val whichPackages: WhichPackages,
     val argumentTypes: Array<String>,
     val fakerModuleFactory: FakerModuleFactory,
     val whenToHook: WhenToHook
 ) {
+    sealed class WhichPackages {
+        object All : WhichPackages()
+        data class Some(val packages: HashSet<String>) : WhichPackages()
+
+        fun isMatching(packageName: String): Boolean
+            = when(this) {
+                is All -> true
+                is Some -> this.packages.contains(packageName)
+            }
+    }
+
     enum class WhenToHook {
         Before,
         After

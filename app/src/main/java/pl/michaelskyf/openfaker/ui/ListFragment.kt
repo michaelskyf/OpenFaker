@@ -110,6 +110,7 @@ class ListFragment : Fragment() {
 
         val result = fakerData.set("com.android.systemui.statusbar.phone.KeyguardBottomAreaView", "launchCamera", arrayOf(
             HookData(
+                HookData.WhichPackages.Some(hashSetOf("com.android.systemui")),
                 arrayOf(String::class.java.name),
                 LuaFakerModuleFactory(lua, 0),
                 HookData.WhenToHook.Before
@@ -132,6 +133,7 @@ class ListFragment : Fragment() {
         """.trimIndent()
         fakerData.set(activity, "onCreate", arrayOf(
             HookData(
+                HookData.WhichPackages.Some(hashSetOf("pl.nextcamera")),
                 arrayOf(Bundle::class.java.name),
                 LuaFakerModuleFactory(lua2, 0),
                 HookData.WhenToHook.Before

@@ -1,8 +1,10 @@
 package pl.michaelskyf.openfaker.module
 
+import de.robv.android.xposed.XposedHelpers
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
+import pl.michaelskyf.openfaker.xposed.XHookHelper
 
 // TODO: Thread safety
 class Hooker(
@@ -13,7 +15,7 @@ class Hooker(
 
     private var methodsToBeHooked: HashSet<MethodData> = hashSetOf()
 
-    fun reloadMethodHooks(methodDataCollection: Collection<MethodData>) {
+    fun reloadMethodHooks(methodDataCollection: List<MethodData>) {
         methodsToBeHooked = methodDataCollection.toHashSet()
     }
 
@@ -26,19 +28,19 @@ class Hooker(
             val className = methodData.className
             val classLoader = param.classLoader
             val methodName = methodData.methodName
-
+            val packageName = param.packageName
+            val hookHandler = HookHandler(packageName, className, methodName, logger, dataTunnel).getOrThrow()
             val declaringClass = resolveDeclaringClass(methodData, classLoader, resolvedClassCache).getOrThrow()
 
-            for (hookData in methodData.hookData) runCatching {
-                val argumentTypes =
-                    resolveArgumentTypes(hookData, classLoader, resolvedClassCache).getOrThrow()
+            val hooks = methodData.hookData.filter { it.whichPackages.isMatching(param.packageName) }
+            for (hookData in hooks) runCatching {
+
+                val argumentTypes = resolveArgumentTypes(hookData, classLoader, resolvedClassCache).getOrThrow()
 
                 val method = hookHelper.findMethod(declaringClass, methodName, *argumentTypes).getOrThrow()
 
-                hookHelper.hookMethod(method,
-                    HookHandler(className, methodName, logger, true, dataTunnel).getOrThrow()
-                )
-            }
+                hookHelper.hookMethod(method, hookHandler)
+            }.onFailure { logger.log(it.toString()) }
         }.onFailure { logger.log(it.toString()) }
     }
 

@@ -44,7 +44,7 @@ class DataTunnel {
             }
         }
 
-        fun all(): Result<Collection<MethodData>> = runCatching {
+        fun all(): Result<List<MethodData>> = runCatching {
             val gsonBuilder = GsonBuilder()
             gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
             val gson = gsonBuilder.create()

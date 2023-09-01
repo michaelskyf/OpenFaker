@@ -8,8 +8,6 @@ import java.util.Optional
 
 class FakerModuleRegistryTest {
 
-    class TestMatchingArgumentsInfo: MatchingArgumentsInfo()
-
     @Test
     fun `getMatchingModules() should return all matching modules`() {
 
@@ -17,14 +15,14 @@ class FakerModuleRegistryTest {
         val argument = "Argument"
 
         val matchingModule = mockk<FakerModule>(relaxed = true)
-        val matchingArgumentsInfo = TestMatchingArgumentsInfo()
+        val matchingArgumentsInfo = MatchingArgumentsInfo(mutableListOf(), mutableListOf())
         matchingArgumentsInfo.exactMatchArguments.add(
             arrayOf(FunctionArgument.require("Argument"))
         )
         every { matchingModule.getMatchingArgumentsInfo() } returns Result.success(matchingArgumentsInfo)
 
         val notMatchingModule = mockk<FakerModule>(relaxed = true)
-        val notMatchingArgumentsInfo = TestMatchingArgumentsInfo()
+        val notMatchingArgumentsInfo = MatchingArgumentsInfo(mutableListOf(), mutableListOf())
         notMatchingArgumentsInfo.exactMatchArguments.add(
             arrayOf(FunctionArgument.require("Should never match this string"))
         )
@@ -55,7 +53,7 @@ class FakerModuleRegistryTest {
         val matchingModule = mockk<FakerModule>()
         val matchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
         every { matchingFunction.call(any()) } returns Result.success(Optional.of(matchingModule))
-        val matchingArgumentsInfo = TestMatchingArgumentsInfo()
+        val matchingArgumentsInfo = MatchingArgumentsInfo(mutableListOf(), mutableListOf())
         matchingArgumentsInfo.customArgumentMatchingFunctions.add(matchingFunction)
 
         every { matchingModule.priority } returns 1
@@ -64,7 +62,7 @@ class FakerModuleRegistryTest {
         val notMatchingModule = mockk<FakerModule>()
         val notMatchingFunction = mockk<FakerModule.FakerArgumentCheckerFunction>(relaxed = true)
         every { notMatchingFunction.call(any()) } returns Result.success(Optional.empty())
-        val notMatchingArgumentsInfo = TestMatchingArgumentsInfo()
+        val notMatchingArgumentsInfo = MatchingArgumentsInfo(mutableListOf(), mutableListOf())
         notMatchingArgumentsInfo.customArgumentMatchingFunctions.add(notMatchingFunction)
 
         every { notMatchingModule.priority } returns 1

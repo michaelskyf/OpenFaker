@@ -1,6 +1,5 @@
 package pl.michaelskyf.openfaker.lua
 
-import org.luaj.vm2.Globals
 import org.luaj.vm2.LuaFunction
 import org.luaj.vm2.lib.jse.CoerceJavaToLua
 import org.luaj.vm2.lib.jse.JsePlatform
@@ -37,9 +36,10 @@ class LuaFakerModule private constructor(
 
     override fun getMatchingArgumentsInfo(): Result<MatchingArgumentsInfo>
         = runCatching {
-            val matchingArgumentsInfo = LuaMatchingArgumentsInfo()
-            registerModule.call(CoerceJavaToLua.coerce(matchingArgumentsInfo))
-            matchingArgumentsInfo
+            val luaMatchingArgumentsInfo = LuaMatchingArgumentsInfo()
+            registerModule.call(CoerceJavaToLua.coerce(luaMatchingArgumentsInfo))
+
+            luaMatchingArgumentsInfo.matchingArgumentsInfo
         }
 
     inner class LuaFakerArgumentCheckerFunction(private val luaFunction: LuaFunction) : FakerArgumentCheckerFunction() {
@@ -53,13 +53,14 @@ class LuaFakerModule private constructor(
             }
     }
 
-    inner class LuaMatchingArgumentsInfo: MatchingArgumentsInfo() {
+    inner class LuaMatchingArgumentsInfo {
+        val matchingArgumentsInfo = MatchingArgumentsInfo(mutableListOf(), mutableListOf())
         fun exactMatchArguments(vararg arguments: FunctionArgument) {
-            exactMatchArguments.add(arguments)
+            matchingArgumentsInfo.exactMatchArguments.add(arguments)
         }
 
         fun customMatchArgument(luaFunction: LuaFunction) {
-            customArgumentMatchingFunctions.add(LuaFakerArgumentCheckerFunction(luaFunction))
+            matchingArgumentsInfo.customArgumentMatchingFunctions.add(LuaFakerArgumentCheckerFunction(luaFunction))
         }
     }
 }
