@@ -7,7 +7,7 @@ import pl.michaelskyf.openfaker.module.FakerModule
 import pl.michaelskyf.openfaker.module.FunctionArgument
 import pl.michaelskyf.openfaker.module.Logger
 import pl.michaelskyf.openfaker.module.MatchingArgumentsInfo
-import pl.michaelskyf.openfaker.module.MethodHookParameters
+import pl.michaelskyf.openfaker.module.HookParameters
 import java.util.Optional
 
 class LuaFakerModule private constructor(
@@ -31,7 +31,7 @@ class LuaFakerModule private constructor(
             }
     }
 
-    override fun run(hookParameters: MethodHookParameters): Result<Boolean>
+    override fun run(hookParameters: HookParameters): Result<Boolean>
         = runCatching { runModule.call(CoerceJavaToLua.coerce(hookParameters)).checkboolean() }
 
     override fun getMatchingArgumentsInfo(): Result<MatchingArgumentsInfo>

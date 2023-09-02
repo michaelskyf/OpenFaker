@@ -29,33 +29,32 @@ class HookHandler private constructor(
 
         private fun loadRegistries(packageName: String, hookData: Array<HookData>, logger: Logger)
             : Result<Pair<FakerModuleRegistry, FakerModuleRegistry>> = runCatching {
-            val beforeRegistry = FakerModuleRegistry()
-            val afterRegistry = FakerModuleRegistry()
+            val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
 
             val hooks = hookData.filter { it.whichPackages.isMatching(packageName) }
             for (holder in hooks) {
                 val registry = when (holder.whenToHook) {
-                    HookData.WhenToHook.Before -> beforeRegistry
-                    HookData.WhenToHook.After -> afterRegistry
+                    HookData.WhenToHook.Before -> registries.first
+                    HookData.WhenToHook.After -> registries.second
                 }
 
                 registry.register(holder.fakerModuleFactory.createFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
             }
 
-            Pair(beforeRegistry, afterRegistry)
+            registries
         }
     }
 
-    fun beforeHookedMethod(hookParameters: MethodHookParameters) {
+    fun beforeHookedMethod(hookParameters: HookParameters): Boolean {
 
         updateRegistries()
 
         val moduleRegistry = fakerRegistries.first
 
-        runModules(hookParameters, moduleRegistry)
+        return runModules(hookParameters, moduleRegistry)
     }
 
-    fun afterHookedMethod(hookParameters: MethodHookParameters) {
+    fun afterHookedMethod(hookParameters: HookParameters) {
 
         updateRegistries()
 
@@ -70,32 +69,21 @@ class HookHandler private constructor(
         }.onFailure { logger.log(it.toString()) }
     }
 
-    private fun runModules(hookParameters: MethodHookParameters, moduleRegistry: FakerModuleRegistry) {
+    private fun runModules(hookParameters: HookParameters, moduleRegistry: FakerModuleRegistry): Boolean {
         val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
 
         for (module in matchingModules) {
-            val hookParametersCopy = TemporaryMethodHookParameters(hookParameters)
-            val result = module.run(hookParametersCopy)
+            val hookParametersClone = hookParameters.clone() as HookParameters
+            val result = module.run(hookParametersClone)
             if (result.getOrDefault(false)) {
-                hookParameters.result = hookParametersCopy.result
-                hookParameters.arguments = hookParametersCopy.arguments
+                hookParameters.result = hookParametersClone.result
+                hookParameters.arguments = hookParametersClone.arguments
+                return true
             } else {
                 result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
         }
-    }
 
-    private class TemporaryMethodHookParameters private constructor(
-        override val thisObject: Any?,
-        override val method: MethodWrapper,
-        override var arguments: Array<Any?>,
-        override var result: Any?
-    ): MethodHookParameters(thisObject, method) {
-
-        companion object {
-            operator fun invoke(methodHookParameters: MethodHookParameters): TemporaryMethodHookParameters
-                    = TemporaryMethodHookParameters(methodHookParameters.thisObject, methodHookParameters.method,
-                methodHookParameters.arguments.clone(), methodHookParameters.result)
-        }
+        return false
     }
 }

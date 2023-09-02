@@ -1,12 +1,11 @@
 package pl.michaelskyf.openfaker.lua
 
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.Test
 import pl.michaelskyf.openfaker.module.FunctionArgument
 import pl.michaelskyf.openfaker.module.Logger
-import pl.michaelskyf.openfaker.module.MethodHookParameters
+import pl.michaelskyf.openfaker.module.HookParameters
 
 class LuaFakerModuleTest {
 
@@ -90,7 +89,7 @@ class LuaFakerModuleTest {
             end
         """.trimIndent()
         val module = LuaFakerModule(0, lua, logger)
-        val parameters = mockk<MethodHookParameters>()
+        val parameters = mockk<HookParameters>()
 
         assert(module.getOrThrow().run(parameters).getOrThrow())
     }
@@ -106,7 +105,7 @@ class LuaFakerModuleTest {
             end
         """.trimIndent()
         val module = LuaFakerModule(0, lua, logger)
-        val parameters = mockk<MethodHookParameters>()
+        val parameters = mockk<HookParameters>()
 
         assert(!module.getOrThrow().run(parameters).getOrThrow())
     }
@@ -122,7 +121,7 @@ class LuaFakerModuleTest {
             end
         """.trimIndent()
         val module = LuaFakerModule(0, lua, logger)
-        val parameters = mockk<MethodHookParameters>()
+        val parameters = mockk<HookParameters>()
 
         assert(module.getOrThrow().run(parameters).isFailure)
     }

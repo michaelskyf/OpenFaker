@@ -8,22 +8,12 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import pl.michaelskyf.openfaker.TestLogger
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
 class HookerTest {
-
-    class TestLogger: Logger() {
-        override fun log(tag: String, message: String) {
-            log("$tag: $message")
-        }
-
-        override fun log(message: String) {
-            println(message)
-        }
-
-    }
 
     @Test
     fun `hookMethods() should hook 2 methods with the same name of the same class to the same HookHandler`() {

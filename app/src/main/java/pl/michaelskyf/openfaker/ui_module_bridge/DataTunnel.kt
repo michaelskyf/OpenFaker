@@ -2,13 +2,6 @@ package pl.michaelskyf.openfaker.ui_module_bridge
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonParseException
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
-import java.lang.reflect.Type
 
 
 class DataTunnel {
@@ -34,9 +27,8 @@ class DataTunnel {
         }
 
         fun runIfChanged(className: String, methodName: String, callback: Array<HookData>.() -> Unit) = runCatching {
-            reload()
-
             val key = "$className.$methodName"
+            reload()
 
             if (modifiedKeys.contains(key)) {
                 callback(get(className, methodName).getOrThrow())
@@ -50,7 +42,7 @@ class DataTunnel {
             val gson = gsonBuilder.create()
 
             modifiedKeys.clear()
-            val rawData = getAll().filterKeys { it != "modifiedKeys" } // .map { gson.fromJson(it.value, Array<HookData>::class.java) }
+            val rawData = getAll().filterKeys { it != "modifiedKeys" }
             val classMethodDataArray = rawData.map {
                 val classMethod = it.key
                 val className = classMethod.substringBeforeLast('.')
@@ -113,42 +105,6 @@ class DataTunnel {
 
             protected abstract fun implPutString(key: String, value: String)
             protected abstract fun implCommit(): Boolean
-        }
-    }
-
-    // https://stackoverflow.com/questions/3629596/deserializing-an-abstract-class-in-gson Thank you very much! :)
-    private class PropertyBasedInterfaceMarshal : JsonSerializer<Any?>,
-        JsonDeserializer<Any?> {
-        @Throws(JsonParseException::class)
-        override fun deserialize(
-            jsonElement: JsonElement, type: Type?,
-            jsonDeserializationContext: JsonDeserializationContext
-        ): Any {
-            val jsonObj = jsonElement.asJsonObject
-            val className = jsonObj[CLASS_META_KEY].asString
-            return try {
-                val clz = Class.forName(className)
-                jsonDeserializationContext.deserialize<Any>(jsonElement, clz)
-            } catch (e: ClassNotFoundException) {
-                throw JsonParseException(e)
-            }
-        }
-
-        override fun serialize(
-            src: Any?,
-            type: Type?,
-            jsonSerializationContext: JsonSerializationContext?
-        ): JsonElement? {
-            val jsonEle = jsonSerializationContext!!.serialize(src, src!!.javaClass)
-            jsonEle.asJsonObject.addProperty(
-                CLASS_META_KEY,
-                src.javaClass.canonicalName
-            )
-            return jsonEle
-        }
-
-        companion object {
-            private const val CLASS_META_KEY = "CLASS_META_KEY"
         }
     }
 }
