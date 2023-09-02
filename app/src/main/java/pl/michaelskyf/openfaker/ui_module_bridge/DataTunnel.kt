@@ -65,7 +65,7 @@ class DataTunnel {
             modifiedKeys.addAll(newModifiedKeys)
         }
 
-        abstract fun implReload(): Boolean
+        protected abstract fun implReload(): Boolean
         protected abstract fun getString(key: String): String?
         protected abstract fun getAll(): Map<String, String>
     }
