@@ -1,20 +1,18 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
 import io.mockk.every
-import io.mockk.excludeRecords
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.fail
+import kotlin.test.assertEquals
 
-class DataTunnelReceiverTest {
+class DataTunnelTest {
     abstract class TestReceiver : DataTunnel.Receiver() {
         public abstract override fun implReload(): Boolean
         public abstract override fun getString(key: String): String?
-        public abstract override fun getAll(): Map<String, String>
+        public abstract override fun implAll(): Map<String, String>
 
     }
 
@@ -34,7 +32,7 @@ class DataTunnelReceiverTest {
         val receiver = spyk<TestReceiver>()
         val receiverData = hashMapOf<String, String>()
         every { receiver.implReload() } returns true
-        every { receiver.getAll() } answers { receiverData }
+        every { receiver.implAll() } answers { receiverData }
         every { receiver.getString(any()) } answers { receiverData[firstArg()] }
         receiver.reload()
 
@@ -56,10 +54,48 @@ class DataTunnelReceiverTest {
         )
 
         sender.edit().putMethodData(methodData1).getOrThrow().putMethodData(methodData2).getOrThrow().commit()
-        val callback = mockk<Array<HookData>.() -> Unit>()
-        receiver.runIfChanged("some.class", "someMethod", callback)
+        val callback = mockk<Array<HookData>.() -> Unit>(relaxed = true)
+        receiver.runIfChanged("some.class", "someMethod", callback).getOrThrow()
 
         verify(exactly = 1) { callback.invoke(any()) }
         verify(exactly = 1) { receiver.runIfChanged(any(), any(), any()) }
+        assertEquals(receiver.all().getOrThrow().size, 2)
+    }
+
+    @Test
+    fun `all() should return all stored data and if the data was not read before it should not call runIfChanged`() {
+        val sender = spyk<DataTunnel.Sender>()
+        val receiver = spyk<TestReceiver>()
+        val receiverData = hashMapOf<String, String>()
+        every { receiver.implReload() } returns false
+        every { receiver.implAll() } answers { receiverData }
+        every { receiver.getString(any()) } answers { receiverData[firstArg()] }
+        receiver.reload()
+
+        val editor = spyk<TestEditor>()
+        every { editor.implPutString(any(), any()) } answers { receiverData[firstArg()] = secondArg() }
+        every { editor.implCommit() } returns true
+        every { sender.edit() } returns editor
+
+        val fakerModuleFactory = mockk<FakerModuleFactory>()
+        val methodData1 = MethodData("some.class", "someMethod",
+            arrayOf(
+                HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+            )
+        )
+        val methodData2 = MethodData("some.other.class", "someMethod",
+            arrayOf(
+                HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+            )
+        )
+
+        sender.edit().putMethodData(methodData1).getOrThrow().putMethodData(methodData2).getOrThrow().commit()
+        val receivedData = receiver.all().getOrThrow()
+
+        receiver.runIfChanged("some.class", "someMethod") {
+            fail("Shouldn't run")
+        }.getOrThrow()
+
+        assertEquals(receivedData.size, 2)
     }
 }

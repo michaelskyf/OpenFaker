@@ -3,7 +3,7 @@ package pl.michaelskyf.openfaker.ui_module_bridge
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
-class DataTunnel {
+interface DataTunnel {
     companion object {
         const val fakerDataFileName = "open_faker_module_method_hooks"
         private fun getGson(): Result<Gson> = runCatching {
@@ -44,7 +44,7 @@ class DataTunnel {
             val gson = getGson().getOrThrow()
 
             modifiedKeys.clear()
-            val rawData = getAll().filterKeys { it != "modifiedKeys" }
+            val rawData = implAll().filterKeys { it != "modifiedKeys" }
             val classMethodDataArray = rawData.map {
                 val classMethod = it.key
                 val className = classMethod.substringBeforeLast('.')
@@ -69,7 +69,7 @@ class DataTunnel {
 
         protected abstract fun implReload(): Boolean
         protected abstract fun getString(key: String): String?
-        protected abstract fun getAll(): Map<String, String>
+        protected abstract fun implAll(): Map<String, String>
     }
 
     interface Sender {

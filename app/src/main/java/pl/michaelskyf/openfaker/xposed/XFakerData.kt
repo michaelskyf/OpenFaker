@@ -26,6 +26,6 @@ class XFakerData private constructor(private val sharedPreferences: XSharedPrefe
     override fun getString(key: String): String?
         = sharedPreferences.getString(key, null)
 
-    override fun getAll(): Map<String, String>
+    override fun implAll(): Map<String, String>
         = sharedPreferences.all as Map<String, String>
 }
