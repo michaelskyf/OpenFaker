@@ -3,10 +3,16 @@ package pl.michaelskyf.openfaker.ui_module_bridge
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
-
 class DataTunnel {
     companion object {
         const val fakerDataFileName = "open_faker_module_method_hooks"
+        private fun getGson(): Result<Gson> = runCatching {
+            val gsonBuilder = GsonBuilder()
+            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
+            gsonBuilder.registerTypeAdapterFactory(SealedTypeAdapterFactory.of(HookData.WhichPackages::class))
+
+            gsonBuilder.create()
+        }
     }
 
     abstract class Receiver {
@@ -18,9 +24,7 @@ class DataTunnel {
             val json = getString(key)
                 ?: throw Exception("Failed to get json from $key")
 
-            val gsonBuilder = GsonBuilder()
-            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
-            val gson = gsonBuilder.create()
+            val gson = getGson().getOrThrow()
 
             modifiedKeys.remove(key)
             gson.fromJson(json, Array<HookData>::class.java)
@@ -37,9 +41,7 @@ class DataTunnel {
         }
 
         fun all(): Result<List<MethodData>> = runCatching {
-            val gsonBuilder = GsonBuilder()
-            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
-            val gson = gsonBuilder.create()
+            val gson = getGson().getOrThrow()
 
             modifiedKeys.clear()
             val rawData = getAll().filterKeys { it != "modifiedKeys" }
@@ -84,9 +86,7 @@ class DataTunnel {
             fun putMethodData(methodData: MethodData): Result<Editor> = runCatching {
                 val key = "${methodData.className}.${methodData.methodName}"
 
-                val gsonBuilder = GsonBuilder()
-                gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
-                val gson = gsonBuilder.create()
+                val gson = getGson().getOrThrow()
 
                 val json = gson.toJson(methodData.hookData)
 

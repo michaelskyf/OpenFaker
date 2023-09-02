@@ -1,12 +1,14 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
 import io.mockk.every
+import io.mockk.excludeRecords
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import kotlin.test.assertTrue
 
 class DataTunnelReceiverTest {
     abstract class TestReceiver : DataTunnel.Receiver() {
@@ -25,6 +27,7 @@ class DataTunnelReceiverTest {
         public abstract override fun implPutString(key: String, value: String)
         public abstract override fun implCommit(): Boolean
     }
+
     @Test
     fun `runIfChanged() should only run given block when reload() returned true and className and methodName match`() {
         val sender = spyk<DataTunnel.Sender>()
@@ -37,7 +40,7 @@ class DataTunnelReceiverTest {
 
         val editor = spyk<TestEditor>()
         every { editor.implPutString(any(), any()) } answers { receiverData[firstArg()] = secondArg() }
-        every { editor.commit() } returns true
+        every { editor.implCommit() } returns true
         every { sender.edit() } returns editor
 
         val fakerModuleFactory = mockk<FakerModuleFactory>()
@@ -53,10 +56,10 @@ class DataTunnelReceiverTest {
         )
 
         sender.edit().putMethodData(methodData1).getOrThrow().putMethodData(methodData2).getOrThrow().commit()
-        receiver.runIfChanged("some.class", "someMethod") {
-            assert(this.contentEquals(methodData1.hookData))
-        }
+        val callback = mockk<Array<HookData>.() -> Unit>()
+        receiver.runIfChanged("some.class", "someMethod", callback)
 
+        verify(exactly = 1) { callback.invoke(any()) }
         verify(exactly = 1) { receiver.runIfChanged(any(), any(), any()) }
     }
 }
