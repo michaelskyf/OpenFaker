@@ -73,7 +73,7 @@ class DataTunnel {
     interface Sender {
         operator fun set(className: String, methodName: String, hookData: Array<HookData>): Result<Unit> = runCatching {
 
-            edit().putMethodHookHolders(className, methodName, hookData).getOrThrow().commit()
+            edit().putMethodData(MethodData(className, methodName, hookData)).getOrThrow().commit()
         }
 
         fun edit(action: Editor.() -> Unit)
@@ -81,14 +81,14 @@ class DataTunnel {
         abstract class Editor {
             private val modifiedKeys = mutableSetOf<String>()
 
-            fun putMethodHookHolders(className: String, methodName: String, hookData: Array<HookData>): Result<Editor> = runCatching {
-                val key = "$className.$methodName"
+            fun putMethodData(methodData: MethodData): Result<Editor> = runCatching {
+                val key = "${methodData.className}.${methodData.methodName}"
 
                 val gsonBuilder = GsonBuilder()
                 gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
                 val gson = gsonBuilder.create()
 
-                val json = gson.toJson(hookData)
+                val json = gson.toJson(methodData.hookData)
 
                 modifiedKeys.add(key)
                 implPutString(key, json)
