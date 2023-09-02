@@ -29,10 +29,12 @@ class Hooker(
             val classLoader = param.classLoader
             val methodName = methodData.methodName
             val packageName = param.packageName
+            val hooks = methodData.hookData.filter { it.whichPackages.isMatching(packageName) }
+            if (hooks.isEmpty()) return@runCatching
+
             val hookHandler = HookHandler(packageName, className, methodName, logger, dataTunnel).getOrThrow()
             val declaringClass = resolveDeclaringClass(methodData, classLoader, resolvedClassCache).getOrThrow()
 
-            val hooks = methodData.hookData.filter { it.whichPackages.isMatching(param.packageName) }
             for (hookData in hooks) runCatching {
 
                 val argumentTypes = resolveArgumentTypes(hookData, classLoader, resolvedClassCache).getOrThrow()

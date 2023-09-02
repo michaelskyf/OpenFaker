@@ -11,6 +11,13 @@ import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 
 class HookHandlerTest {
 
+    class TestHookParameters(
+        override val thisObject: Any?,
+        override val method: MethodWrapper,
+        override var arguments: Array<Any?>,
+        override var result: Any?
+    ): HookParameters(thisObject, method)
+
     @Test
     fun `beforeHookedMethod() should run only a matching hook marked to run before the hooked function`() {
 
@@ -37,7 +44,7 @@ class HookHandlerTest {
 
         val thisObject = mockk<Any>()
         val method = mockk<MethodWrapper>()
-        val hookParameters = HookParameters(thisObject, method, arrayOf(), null)
+        val hookParameters = TestHookParameters(thisObject, method, arrayOf(), null)
         hookHandler.beforeHookedMethod(hookParameters)
 
         verify(exactly = 1) { fakerModule.run(any()) }

@@ -25,7 +25,7 @@ class XHookHelper() : HookHelper {
             = runCatching { XposedHelpers.findMethodExact(clazz, methodName, *parameterTypes) }
 
     override fun hookMethod(method: Method, callback: HookHandler) {
-        XposedBridge.hookMethod(method, XMethodHookHandler(callback))
+        XposedBridge.hookMethod(method, XHookHandler(callback))
     }
 
     override fun findField(classType: Class<*>, fieldName: String): Result<Field>

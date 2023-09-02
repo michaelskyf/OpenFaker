@@ -58,13 +58,15 @@ interface DataTunnel {
             classMethodDataArray
         }
 
-        fun reload() {
-            if (!implReload()) return
+        fun reload(): Boolean {
+            if (!implReload()) return false
 
-            val json = getString("modifiedKeys") ?: return
+            val json = getString("modifiedKeys") ?: return false
             val newModifiedKeys = Gson().fromJson(json, Array<String>::class.java)
 
             modifiedKeys.addAll(newModifiedKeys)
+
+            return true
         }
 
         protected abstract fun implReload(): Boolean

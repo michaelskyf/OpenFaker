@@ -45,13 +45,13 @@ class HookHandler private constructor(
         }
     }
 
-    fun beforeHookedMethod(hookParameters: HookParameters): Boolean {
+    fun beforeHookedMethod(hookParameters: HookParameters) {
 
         updateRegistries()
 
         val moduleRegistry = fakerRegistries.first
 
-        return runModules(hookParameters, moduleRegistry)
+        runModules(hookParameters, moduleRegistry)
     }
 
     fun afterHookedMethod(hookParameters: HookParameters) {
@@ -69,7 +69,7 @@ class HookHandler private constructor(
         }.onFailure { logger.log(it.toString()) }
     }
 
-    private fun runModules(hookParameters: HookParameters, moduleRegistry: FakerModuleRegistry): Boolean {
+    private fun runModules(hookParameters: HookParameters, moduleRegistry: FakerModuleRegistry) {
         val matchingModules = moduleRegistry.getMatchingModules(hookParameters.arguments)
 
         for (module in matchingModules) {
@@ -78,12 +78,10 @@ class HookHandler private constructor(
             if (result.getOrDefault(false)) {
                 hookParameters.result = hookParametersClone.result
                 hookParameters.arguments = hookParametersClone.arguments
-                return true
+                return
             } else {
                 result.exceptionOrNull()?.let { logger.log(it.toString()) }
             }
         }
-
-        return false
     }
 }
