@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlinx-serialization")
 }
 
 android {
@@ -58,9 +59,9 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("io.mockk:mockk:1.13.7")
 
-    implementation("com.google.code.gson:gson:2.10.1")
     compileOnly("de.robv.android.xposed:api:82")
     implementation("org.luaj:luaj-jse:3.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 }
 
 tasks.withType<Test>().configureEach {

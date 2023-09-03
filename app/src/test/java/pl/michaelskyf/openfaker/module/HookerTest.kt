@@ -39,8 +39,8 @@ class HookerTest {
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
                 arrayOf(
-                    HookData(HookData.WhichPackages.All, arrayOf(), mockk(), HookData.WhenToHook.Before),
-                    HookData(HookData.WhichPackages.All, arrayOf(String::class.java.name), mockk(), HookData.WhenToHook.After)
+                    HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before),
+                    HookData(HookData.WhichPackages.All(), arrayOf(String::class.java.name), mockk(), HookData.WhenToHook.After)
                 )
             )
         )
@@ -83,10 +83,10 @@ class HookerTest {
 
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All, arrayOf(), mockk(), HookData.WhenToHook.Before))
+                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before))
             ),
             MethodData(TestClass2::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All, arrayOf(), mockk(), HookData.WhenToHook.Before))
+                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before))
             )
         )
 

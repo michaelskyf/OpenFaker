@@ -1,7 +1,6 @@
 package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.module.Hooker

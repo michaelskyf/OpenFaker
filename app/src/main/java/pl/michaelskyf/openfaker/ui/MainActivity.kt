@@ -21,8 +21,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setShowWhenLocked(true)
-
         startActivity(this.intent)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

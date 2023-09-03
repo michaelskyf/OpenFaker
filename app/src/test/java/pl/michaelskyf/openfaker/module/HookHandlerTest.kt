@@ -33,8 +33,8 @@ class HookHandlerTest {
         every { fakerModule.run(any()) } returns Result.success(true)
         every { fakerModuleFactory.createFakerModule(any()) } returns Result.success(fakerModule)
         val hooks = arrayOf(
-            HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
-            HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.After)
+            HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
+            HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.After)
         )
         every { dataTunnel[any(), any()] } returns Result.success(hooks)
         every { dataTunnel.runIfChanged(any(), any(), any()) } returns Result.success(Unit)

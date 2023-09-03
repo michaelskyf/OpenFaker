@@ -7,7 +7,7 @@ class HookDataTest {
 
     @Test
     fun `WhichPackages(All) isMatching() should always return true`() {
-        val whichPackages = HookData.WhichPackages.All
+        val whichPackages = HookData.WhichPackages.All()
 
         assertTrue(whichPackages.isMatching(""))
         assertTrue(whichPackages.isMatching("random text"))
@@ -15,7 +15,7 @@ class HookDataTest {
 
     @Test
     fun `WhichPackages(Some) isMatching() should return true only when packageName is contained inside`() {
-        val whichPackages = HookData.WhichPackages.Some(hashSetOf("matching1", "matching2"))
+        val whichPackages = HookData.WhichPackages.Some(arrayOf("matching1", "matching2"))
 
         assertTrue(whichPackages.isMatching("matching1"))
         assertTrue(whichPackages.isMatching("matching2"))

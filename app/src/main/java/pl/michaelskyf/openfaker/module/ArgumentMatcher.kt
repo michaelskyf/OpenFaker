@@ -1,8 +1,5 @@
 package pl.michaelskyf.openfaker.module
 
-import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
-
 class ArgumentMatcher private constructor(
     private val match: MutableMap<Any?, ArgumentMatcher>,
     private var ignore: ArgumentMatcher?,

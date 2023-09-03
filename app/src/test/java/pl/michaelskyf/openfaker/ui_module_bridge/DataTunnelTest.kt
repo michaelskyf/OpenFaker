@@ -41,15 +41,15 @@ class DataTunnelTest {
         every { editor.implCommit() } returns true
         every { sender.edit() } returns editor
 
-        val fakerModuleFactory = mockk<FakerModuleFactory>()
+        val fakerModuleFactory = TestFakerModuleFactory()
         val methodData1 = MethodData("some.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
             )
         )
         val methodData2 = MethodData("some.other.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
             )
         )
 
@@ -77,15 +77,15 @@ class DataTunnelTest {
         every { editor.implCommit() } returns true
         every { sender.edit() } returns editor
 
-        val fakerModuleFactory = mockk<FakerModuleFactory>()
+        val fakerModuleFactory = TestFakerModuleFactory()
         val methodData1 = MethodData("some.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
             )
         )
         val methodData2 = MethodData("some.other.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
             )
         )
 

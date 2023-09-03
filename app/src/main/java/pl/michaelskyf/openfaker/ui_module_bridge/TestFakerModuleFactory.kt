@@ -5,6 +5,8 @@ import pl.michaelskyf.openfaker.module.FakerModule
 import pl.michaelskyf.openfaker.module.Logger
 
 @Serializable
-sealed interface FakerModuleFactory {
-    fun createFakerModule(logger: Logger): Result<FakerModule>
+class TestFakerModuleFactory : FakerModuleFactory {
+    override fun createFakerModule(logger: Logger): Result<FakerModule> {
+        TODO("Not yet implemented")
+    }
 }

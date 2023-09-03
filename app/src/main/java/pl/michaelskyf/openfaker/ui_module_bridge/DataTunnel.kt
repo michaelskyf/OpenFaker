@@ -1,22 +1,14 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 interface DataTunnel {
     companion object {
         const val fakerDataFileName = "open_faker_module_method_hooks"
-        private fun getGson(): Result<Gson> = runCatching {
-            val gsonBuilder = GsonBuilder()
-            gsonBuilder.registerTypeAdapter(FakerModuleFactory::class.java, PropertyBasedInterfaceMarshal())
-            gsonBuilder.registerTypeAdapterFactory(SealedTypeAdapterFactory.of(HookData.WhichPackages::class))
-
-            gsonBuilder.create()
-        }
     }
 
     abstract class Receiver {
-
         private var modifiedKeys: HashSet<String> = hashSetOf()
 
         operator fun get(className: String, methodName: String): Result<Array<HookData>> = runCatching {
@@ -24,10 +16,8 @@ interface DataTunnel {
             val json = getString(key)
                 ?: throw Exception("Failed to get json from $key")
 
-            val gson = getGson().getOrThrow()
-
             modifiedKeys.remove(key)
-            gson.fromJson(json, Array<HookData>::class.java)
+            Json.decodeFromString(json)
         }
 
         fun runIfChanged(className: String, methodName: String, callback: Array<HookData>.() -> Unit) = runCatching {
@@ -41,7 +31,6 @@ interface DataTunnel {
         }
 
         fun all(): Result<List<MethodData>> = runCatching {
-            val gson = getGson().getOrThrow()
 
             modifiedKeys.clear()
             val rawData = implAll().filterKeys { it != "modifiedKeys" }
@@ -50,7 +39,7 @@ interface DataTunnel {
                 val className = classMethod.substringBeforeLast('.')
                 val methodName = classMethod.substringAfterLast('.')
 
-                val dataArray = gson.fromJson(it.value, Array<HookData>::class.java)
+                val dataArray = Json.decodeFromString<Array<HookData>>(it.value)
 
                 MethodData(className, methodName, dataArray)
             }
@@ -62,7 +51,7 @@ interface DataTunnel {
             if (!implReload()) return false
 
             val json = getString("modifiedKeys") ?: return false
-            val newModifiedKeys = Gson().fromJson(json, Array<String>::class.java)
+            val newModifiedKeys = Json.decodeFromString<Array<String>>(json)
 
             modifiedKeys.addAll(newModifiedKeys)
 
@@ -88,9 +77,7 @@ interface DataTunnel {
             fun putMethodData(methodData: MethodData): Result<Editor> = runCatching {
                 val key = "${methodData.className}.${methodData.methodName}"
 
-                val gson = getGson().getOrThrow()
-
-                val json = gson.toJson(methodData.hookData)
+                val json = Json.encodeToString(methodData.hookData)
 
                 modifiedKeys.add(key)
                 implPutString(key, json)
@@ -99,7 +86,7 @@ interface DataTunnel {
             }
 
             fun commit(): Boolean {
-                val json = Gson().toJson(modifiedKeys.toTypedArray())
+                val json = Json.encodeToString(modifiedKeys.toTypedArray())
                 implPutString("modifiedKeys", json)
 
                 return implCommit()
