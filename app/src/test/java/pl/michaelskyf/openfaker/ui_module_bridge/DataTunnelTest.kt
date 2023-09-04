@@ -42,19 +42,19 @@ class DataTunnelTest {
         every { sender.edit() } returns editor
 
         val fakerModuleFactory = TestFakerModuleFactory()
-        val methodData1 = MethodData("some.class", "someMethod",
+        val hookerData1 = HookerData("some.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookHandlerData.WhenToHook.Before)
             )
         )
-        val methodData2 = MethodData("some.other.class", "someMethod",
+        val hookerData2 = HookerData("some.other.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookHandlerData.WhenToHook.Before)
             )
         )
 
-        sender.edit().putMethodData(methodData1).getOrThrow().putMethodData(methodData2).getOrThrow().commit()
-        val callback = mockk<Array<HookData>.() -> Unit>(relaxed = true)
+        sender.edit().putMethodData(hookerData1).getOrThrow().putMethodData(hookerData2).getOrThrow().commit()
+        val callback = mockk<Array<HookHandlerData>.() -> Unit>(relaxed = true)
         receiver.runIfChanged("some.class", "someMethod", callback).getOrThrow()
 
         verify(exactly = 1) { callback.invoke(any()) }
@@ -78,18 +78,18 @@ class DataTunnelTest {
         every { sender.edit() } returns editor
 
         val fakerModuleFactory = TestFakerModuleFactory()
-        val methodData1 = MethodData("some.class", "someMethod",
+        val hookerData1 = HookerData("some.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookHandlerData.WhenToHook.Before)
             )
         )
-        val methodData2 = MethodData("some.other.class", "someMethod",
+        val hookerData2 = HookerData("some.other.class", "someMethod",
             arrayOf(
-                HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before)
+                HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookHandlerData.WhenToHook.Before)
             )
         )
 
-        sender.edit().putMethodData(methodData1).getOrThrow().putMethodData(methodData2).getOrThrow().commit()
+        sender.edit().putMethodData(hookerData1).getOrThrow().putMethodData(hookerData2).getOrThrow().commit()
         val receivedData = receiver.all().getOrThrow()
 
         receiver.runIfChanged("some.class", "someMethod") {

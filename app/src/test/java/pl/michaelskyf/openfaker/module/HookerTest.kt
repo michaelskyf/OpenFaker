@@ -10,8 +10,8 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import pl.michaelskyf.openfaker.TestLogger
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
-import pl.michaelskyf.openfaker.ui_module_bridge.HookData
-import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
+import pl.michaelskyf.openfaker.ui_module_bridge.HookHandlerData
+import pl.michaelskyf.openfaker.ui_module_bridge.HookerData
 
 class HookerTest {
 
@@ -37,10 +37,10 @@ class HookerTest {
         every { HookHandler.invoke(any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
 
         val hooks = listOf(
-            MethodData(TestClass::class.java.name, "method",
+            HookerData(TestClass::class.java.name, "method",
                 arrayOf(
-                    HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before),
-                    HookData(HookData.WhichPackages.All(), arrayOf(String::class.java.name), mockk(), HookData.WhenToHook.After)
+                    HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), mockk(), HookHandlerData.WhenToHook.Before),
+                    HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(String::class.java.name), mockk(), HookHandlerData.WhenToHook.After)
                 )
             )
         )
@@ -82,11 +82,11 @@ class HookerTest {
         every { HookHandler.invoke(any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
 
         val hooks = listOf(
-            MethodData(TestClass::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before))
+            HookerData(TestClass::class.java.name, "method",
+                arrayOf(HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), mockk(), HookHandlerData.WhenToHook.Before))
             ),
-            MethodData(TestClass2::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before))
+            HookerData(TestClass2::class.java.name, "method",
+                arrayOf(HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), mockk(), HookHandlerData.WhenToHook.Before))
             )
         )
 

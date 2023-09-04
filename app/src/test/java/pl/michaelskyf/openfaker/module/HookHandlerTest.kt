@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import pl.michaelskyf.openfaker.TestLogger
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 import pl.michaelskyf.openfaker.ui_module_bridge.FakerModuleFactory
-import pl.michaelskyf.openfaker.ui_module_bridge.HookData
+import pl.michaelskyf.openfaker.ui_module_bridge.HookHandlerData
 
 class HookHandlerTest {
 
@@ -33,8 +33,8 @@ class HookHandlerTest {
         every { fakerModule.run(any()) } returns Result.success(true)
         every { fakerModuleFactory.createFakerModule(any()) } returns Result.success(fakerModule)
         val hooks = arrayOf(
-            HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
-            HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.After)
+            HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookHandlerData.WhenToHook.Before),
+            HookHandlerData(HookHandlerData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookHandlerData.WhenToHook.After)
         )
         every { dataTunnel[any(), any()] } returns Result.success(hooks)
         every { dataTunnel.runIfChanged(any(), any(), any()) } returns Result.success(Unit)

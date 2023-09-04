@@ -11,7 +11,7 @@ interface DataTunnel {
     abstract class Receiver {
         private var modifiedKeys: HashSet<String> = hashSetOf()
 
-        operator fun get(className: String, methodName: String): Result<Array<HookData>> = runCatching {
+        operator fun get(className: String, methodName: String): Result<Array<HookHandlerData>> = runCatching {
             val key = "$className.$methodName"
             val json = getString(key)
                 ?: throw Exception("Failed to get json from $key")
@@ -20,7 +20,7 @@ interface DataTunnel {
             Json.decodeFromString(json)
         }
 
-        fun runIfChanged(className: String, methodName: String, callback: Array<HookData>.() -> Unit) = runCatching {
+        fun runIfChanged(className: String, methodName: String, callback: Array<HookHandlerData>.() -> Unit) = runCatching {
             val key = "$className.$methodName"
             reload()
 
@@ -30,21 +30,21 @@ interface DataTunnel {
             }
         }
 
-        fun all(): Result<List<MethodData>> = runCatching {
+        fun all(): Result<List<HookerData>> = runCatching {
 
             modifiedKeys.clear()
             val rawData = implAll().filterKeys { it != "modifiedKeys" }
-            val classMethodDataArray = rawData.map {
+            val classHookerDataArray = rawData.map {
                 val classMethod = it.key
                 val className = classMethod.substringBeforeLast('.')
                 val methodName = classMethod.substringAfterLast('.')
 
-                val dataArray = Json.decodeFromString<Array<HookData>>(it.value)
+                val dataArray = Json.decodeFromString<Array<HookHandlerData>>(it.value)
 
-                MethodData(className, methodName, dataArray)
+                HookerData(className, methodName, dataArray)
             }
 
-            classMethodDataArray
+            classHookerDataArray
         }
 
         fun reload(): Boolean {
@@ -64,9 +64,9 @@ interface DataTunnel {
     }
 
     interface Sender {
-        operator fun set(className: String, methodName: String, hookData: Array<HookData>): Result<Unit> = runCatching {
+        operator fun set(className: String, methodName: String, hookHandlerData: Array<HookHandlerData>): Result<Unit> = runCatching {
 
-            edit().putMethodData(MethodData(className, methodName, hookData)).getOrThrow().commit()
+            edit().putMethodData(HookerData(className, methodName, hookHandlerData)).getOrThrow().commit()
         }
 
         fun edit(action: Editor.() -> Unit)
@@ -74,10 +74,10 @@ interface DataTunnel {
         abstract class Editor {
             private val modifiedKeys = mutableSetOf<String>()
 
-            fun putMethodData(methodData: MethodData): Result<Editor> = runCatching {
-                val key = "${methodData.className}.${methodData.methodName}"
+            fun putMethodData(hookerData: HookerData): Result<Editor> = runCatching {
+                val key = "${hookerData.className}.${hookerData.methodName}"
 
-                val json = Json.encodeToString(methodData.hookData)
+                val json = Json.encodeToString(hookerData.hookData)
 
                 modifiedKeys.add(key)
                 implPutString(key, json)

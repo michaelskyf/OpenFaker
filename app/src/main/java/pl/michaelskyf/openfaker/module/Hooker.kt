@@ -1,10 +1,7 @@
 package pl.michaelskyf.openfaker.module
 
-import de.robv.android.xposed.XposedHelpers
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
-import pl.michaelskyf.openfaker.ui_module_bridge.HookData
-import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
-import pl.michaelskyf.openfaker.xposed.XHookHelper
+import pl.michaelskyf.openfaker.ui_module_bridge.HookerData
 
 // TODO: Thread safety
 class Hooker(
@@ -13,10 +10,10 @@ class Hooker(
     private val logger: Logger
     ) {
 
-    private var methodsToBeHooked: HashSet<MethodData> = hashSetOf()
+    private var methodsToBeHooked: HashSet<HookerData> = hashSetOf()
 
-    fun reloadMethodHooks(methodDataCollection: List<MethodData>) {
-        methodsToBeHooked = methodDataCollection.toHashSet()
+    fun reloadMethodHooks(hookerDataCollection: List<HookerData>) {
+        methodsToBeHooked = hookerDataCollection.toHashSet()
     }
 
     fun hookMethods(param: LoadPackageParam) {
@@ -29,35 +26,31 @@ class Hooker(
             val classLoader = param.classLoader
             val methodName = methodData.methodName
             val packageName = param.packageName
-            val hooks = methodData.hookData.filter { it.whichPackages.isMatching(packageName) }
-            if (hooks.isEmpty()) return@runCatching
+            val argumentTypes = methodData.argumentTypes
 
             val hookHandler = HookHandler(packageName, className, methodName, logger, dataTunnel).getOrThrow()
             val declaringClass = resolveDeclaringClass(methodData, classLoader, resolvedClassCache).getOrThrow()
 
-            for (hookData in hooks) runCatching {
+            val resolvedArgumentTypes = resolveArgumentTypes(argumentTypes, classLoader, resolvedClassCache).getOrThrow()
 
-                val argumentTypes = resolveArgumentTypes(hookData, classLoader, resolvedClassCache).getOrThrow()
+            val method = hookHelper.findMethod(declaringClass, methodName, *resolvedArgumentTypes).getOrThrow()
 
-                val method = hookHelper.findMethod(declaringClass, methodName, *argumentTypes).getOrThrow()
-
-                hookHelper.hookMethod(method, hookHandler)
-            }.onFailure { logger.log(it.toString()) }
+            hookHelper.hookMethod(method, hookHandler)
         }.onFailure { logger.log(it.toString()) }
     }
 
     private fun resolveArgumentTypes(
-        methodInfo: HookData,
+        argumentTypes: Array<String>,
         classLoader: ClassLoader,
         resolvedClassCache: MutableMap<String, Class<*>>
     ) = runCatching {
-        methodInfo.argumentTypes.map {
+        argumentTypes.map {
             resolvedClassCache.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
         }.toTypedArray()
     }
 
     private fun resolveDeclaringClass(
-        methodInfo: MethodData,
+        methodInfo: HookerData,
         classLoader: ClassLoader,
         resolvedClassCache: MutableMap<String, Class<*>>
     ) = runCatching {

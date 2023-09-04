@@ -1,7 +1,7 @@
 package pl.michaelskyf.openfaker.module
 
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
-import pl.michaelskyf.openfaker.ui_module_bridge.HookData
+import pl.michaelskyf.openfaker.ui_module_bridge.HookHandlerData
 
 // TODO: Thread safety
 class HookHandler private constructor(
@@ -27,15 +27,15 @@ class HookHandler private constructor(
             HookHandler(packageName, className, methodName, logger, dataTunnel, registries)
         }
 
-        private fun loadRegistries(packageName: String, hookData: Array<HookData>, logger: Logger)
+        private fun loadRegistries(packageName: String, hookHandlerData: Array<HookHandlerData>, logger: Logger)
             : Result<Pair<FakerModuleRegistry, FakerModuleRegistry>> = runCatching {
             val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
 
-            val hooks = hookData.filter { it.whichPackages.isMatching(packageName) }
+            val hooks = hookHandlerData.filter { it.whichPackages.isMatching(packageName) }
             for (holder in hooks) {
                 val registry = when (holder.whenToHook) {
-                    HookData.WhenToHook.Before -> registries.first
-                    HookData.WhenToHook.After -> registries.second
+                    HookHandlerData.WhenToHook.Before -> registries.first
+                    HookHandlerData.WhenToHook.After -> registries.second
                 }
 
                 registry.register(holder.fakerModuleFactory.createFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
