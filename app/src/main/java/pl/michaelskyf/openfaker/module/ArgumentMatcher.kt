@@ -11,11 +11,11 @@ class ArgumentMatcher private constructor(
         }
     }
 
-    fun match(arguments: Array<*>): List<FakerModule> {
+    fun matchModules(arguments: Array<*>): List<FakerModule> {
         if (arguments.isEmpty()) return list
 
-        val resultMatch = match[arguments.first()]?.match(arguments.sliceArray(1 until arguments.size)) ?: listOf()
-        val resultIgnore = ignore?.match(arguments.sliceArray(1 until arguments.size)) ?: listOf()
+        val resultMatch = match[arguments.first()]?.matchModules(arguments.sliceArray(1 until arguments.size)) ?: listOf()
+        val resultIgnore = ignore?.matchModules(arguments.sliceArray(1 until arguments.size)) ?: listOf()
 
         return resultMatch + resultIgnore
     }

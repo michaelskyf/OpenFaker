@@ -10,13 +10,7 @@ class Hooker(
     private val logger: Logger
     ) {
 
-    private var methodsToBeHooked: HashSet<HookerData> = hashSetOf()
-
-    fun reloadMethodHooks(hookerDataCollection: List<HookerData>) {
-        methodsToBeHooked = hookerDataCollection.toHashSet()
-    }
-
-    fun hookMethods(param: LoadPackageParam) {
+    fun hookMethods(hooks: , param: LoadPackageParam) {
 
         // Classes may only be cached per-package, since specific classes may not be accessible in all packages
         val resolvedClassCache = mutableMapOf<String, Class<*>>()
