@@ -25,7 +25,7 @@ class ArgumentMatcherTest {
 
         argumentMatcher.add(moduleArguments, fakerModule)
 
-        val queue = argumentMatcher.match(arrayOf(
+        val queue = argumentMatcher.matchModules(arrayOf(
             "Shouldn't match this",
             "Hello",
             1234,
@@ -49,7 +49,7 @@ class ArgumentMatcherTest {
 
         argumentMatcher.add(moduleArguments, fakerModule)
 
-        val queue = argumentMatcher.match(arrayOf(
+        val queue = argumentMatcher.matchModules(arrayOf(
             "Shouldn't match this",
             "Hello",
             1234,
@@ -111,7 +111,7 @@ class ArgumentMatcherTest {
             argumentMatcher.add(it, notMatchingFakerModule)
         }
 
-        val queue = argumentMatcher.match(arrayOf(
+        val queue = argumentMatcher.matchModules(arrayOf(
             "Hello",
             123,
             "Everyone!",
@@ -139,7 +139,7 @@ class ArgumentMatcherTest {
 
         argumentMatcher.add(moduleArguments, fakerModule)
 
-        val queue = argumentMatcher.match(arrayOf(
+        val queue = argumentMatcher.matchModules(arrayOf(
             FunctionArgument.require("Hello"),
             "Hello",
             FunctionArgument.require(1234),

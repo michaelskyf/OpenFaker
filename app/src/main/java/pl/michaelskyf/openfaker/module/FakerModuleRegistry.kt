@@ -20,14 +20,13 @@ class FakerModuleRegistry {
     }
 
     fun getMatchingModules(hookedFunctionArguments: Array<*>): MatchingModulesIterator {
-        val matchingArguments: List<Priority> = argumentMatcher.match(hookedFunctionArguments)
-        val mergedLists = matchingArguments + argumentMatchingFunctions
+        val matchingModules: List<Priority> = argumentMatcher.matchModules(hookedFunctionArguments)
+        val mergedLists = matchingModules + argumentMatchingFunctions
 
-        return MatchingModulesIterator(hookedFunctionArguments, PriorityQueue(mergedLists))
+        return MatchingModulesIterator(hookedFunctionArguments, PriorityQueue(mergedLists).iterator())
     }
-    inner class MatchingModulesIterator(val hookedFunctionArguments: Array<*>, val mergedMatchers: PriorityQueue<Priority>) : Iterator<FakerModule> {
+    inner class MatchingModulesIterator(private val hookedFunctionArguments: Array<*>, private val queueIterator: Iterator<Priority>) : Iterator<FakerModule> {
 
-        private val queueIterator = mergedMatchers.iterator()
         private lateinit var nextModule: FakerModule
         override fun hasNext(): Boolean {
 
