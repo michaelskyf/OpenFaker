@@ -1,10 +1,8 @@
 package pl.michaelskyf.openfaker.module
 
-import de.robv.android.xposed.XposedHelpers
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
-import pl.michaelskyf.openfaker.xposed.XHookHelper
 
 // TODO: Thread safety
 class Hooker(
@@ -12,19 +10,12 @@ class Hooker(
     private val dataTunnel: DataTunnel.Receiver,
     private val logger: Logger
     ) {
-
-    private var methodsToBeHooked: HashSet<MethodData> = hashSetOf()
-
-    fun reloadMethodHooks(methodDataCollection: List<MethodData>) {
-        methodsToBeHooked = methodDataCollection.toHashSet()
-    }
-
-    fun hookMethods(param: LoadPackageParam) {
+    fun hookMethods(hooks: List<MethodData>, param: LoadPackageParam) {
 
         // Classes may only be cached per-package, since specific classes may not be accessible in all packages
         val resolvedClassCache = mutableMapOf<String, Class<*>>()
 
-        for (methodData in methodsToBeHooked) runCatching {
+        for (methodData in hooks) runCatching {
             val className = methodData.className
             val classLoader = param.classLoader
             val methodName = methodData.methodName

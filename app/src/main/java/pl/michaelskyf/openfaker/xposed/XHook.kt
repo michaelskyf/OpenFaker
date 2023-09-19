@@ -18,17 +18,12 @@ class XHook : IXposedHookLoadPackage {
 
         logger.log("OpenFaker: New app: " + lpparam.packageName)
 
-        reloadHooks().getOrElse { logger.log(it.toString()) }
-
-        val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
-        hooker.hookMethods(param)
+        kotlin.runCatching {
+            val data = moduleData.all().getOrThrow()
+            val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
+            hooker.hookMethods(data, param)
+        }.onFailure { logger.log(it.toString()) }
 
         logger.log("OpenFaker: Hooking done")
-    }
-
-    private fun reloadHooks(): Result<Unit> = runCatching {
-        val newData = moduleData.all().getOrThrow()
-
-        hooker.reloadMethodHooks(newData)
     }
 }
