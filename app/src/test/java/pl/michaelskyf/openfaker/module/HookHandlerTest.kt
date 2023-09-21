@@ -36,11 +36,10 @@ class HookHandlerTest {
             HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
             HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.After)
         )
-        every { dataTunnel[any(), any()] } returns Result.success(hooks)
         every { dataTunnel.runIfChanged(any(), any(), any()) } returns Result.success(Unit)
 
         val hookHandler = HookHandler("some.package", "some.class",
-            "someMethod", TestLogger(), dataTunnel).getOrThrow()
+            "someMethod", TestLogger(), dataTunnel, hooks).getOrThrow()
 
         val thisObject = mockk<Any>()
         val method = mockk<MethodWrapper>()

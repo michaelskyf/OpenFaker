@@ -5,25 +5,25 @@ import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
 // TODO: Thread safety
-class Hooker(
+class HookDispatcher(
     private val hookHelper: HookHelper,
     private val dataTunnel: DataTunnel.Receiver,
     private val logger: Logger
     ) {
-    fun hookMethods(hooks: List<MethodData>, param: LoadPackageParam) {
+    fun hookMethods(methodsToHook: List<MethodData>, param: LoadPackageParam) {
 
         // Classes may only be cached per-package, since specific classes may not be accessible in all packages
         val resolvedClassCache = mutableMapOf<String, Class<*>>()
 
-        for (methodData in hooks) runCatching {
+        for (methodData in methodsToHook) runCatching {
             val className = methodData.className
             val classLoader = param.classLoader
             val methodName = methodData.methodName
             val packageName = param.packageName
-            val hooks = methodData.hookData.filter { it.whichPackages.isMatching(packageName) }
+            val hooks = methodData.hookData.filter { it.whichPackages.isMatching(packageName) }.toTypedArray()
             if (hooks.isEmpty()) return@runCatching
 
-            val hookHandler = HookHandler(packageName, className, methodName, logger, dataTunnel).getOrThrow()
+            val hookHandler = HookHandler(packageName, className, methodName, logger, dataTunnel, hooks).getOrThrow()
             val declaringClass = resolveDeclaringClass(methodData, classLoader, resolvedClassCache).getOrThrow()
 
             for (hookData in hooks) runCatching {

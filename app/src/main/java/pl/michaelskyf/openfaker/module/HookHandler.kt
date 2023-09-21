@@ -19,19 +19,11 @@ class HookHandler private constructor(
             className: String,
             methodName: String,
             logger: Logger,
-            dataTunnel: DataTunnel.Receiver
+            dataTunnel: DataTunnel.Receiver,
+            hooks: Array<HookData>
         ): Result<HookHandler> = runCatching {
-            val methodHookHolders = dataTunnel[className, methodName].getOrThrow()
-            val registries = loadRegistries(packageName, methodHookHolders, logger).getOrThrow()
-
-            HookHandler(packageName, className, methodName, logger, dataTunnel, registries)
-        }
-
-        private fun loadRegistries(packageName: String, hookData: Array<HookData>, logger: Logger)
-            : Result<Pair<FakerModuleRegistry, FakerModuleRegistry>> = runCatching {
             val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
 
-            val hooks = hookData.filter { it.whichPackages.isMatching(packageName) }
             for (holder in hooks) {
                 val registry = when (holder.whenToHook) {
                     HookData.WhenToHook.Before -> registries.first
@@ -41,7 +33,7 @@ class HookHandler private constructor(
                 registry.register(holder.fakerModuleFactory.createFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
             }
 
-            registries
+            HookHandler(packageName, className, methodName, logger, dataTunnel, registries)
         }
     }
 
@@ -65,7 +57,19 @@ class HookHandler private constructor(
 
     private fun updateRegistries() {
         dataTunnel.runIfChanged(className, methodName) {
-            fakerRegistries = loadRegistries(packageName, this, logger).getOrThrow()
+            val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
+
+            val hooks = dataTunnel[className, methodName].getOrThrow().filter { it.whichPackages.isMatching(packageName) }
+            for (holder in hooks) {
+                val registry = when (holder.whenToHook) {
+                    HookData.WhenToHook.Before -> registries.first
+                    HookData.WhenToHook.After -> registries.second
+                }
+
+                registry.register(holder.fakerModuleFactory.createFakerModule(logger).getOrThrow()).getOrElse { logger.log(it.toString()) }
+            }
+
+            fakerRegistries = registries
         }.onFailure { logger.log(it.toString()) }
     }
 

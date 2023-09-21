@@ -3,7 +3,7 @@ package pl.michaelskyf.openfaker.xposed
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
-import pl.michaelskyf.openfaker.module.Hooker
+import pl.michaelskyf.openfaker.module.HookDispatcher
 import pl.michaelskyf.openfaker.module.LoadPackageParam
 
 class XHook : IXposedHookLoadPackage {
@@ -11,7 +11,7 @@ class XHook : IXposedHookLoadPackage {
     private val logger = XLogger()
     private val hookHelper = XHookHelper()
     private val moduleData = XFakerData()
-    private val hooker = Hooker(hookHelper, moduleData, logger)
+    private val hookDispatcher = HookDispatcher(hookHelper, moduleData, logger)
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) return
@@ -21,7 +21,7 @@ class XHook : IXposedHookLoadPackage {
         kotlin.runCatching {
             val data = moduleData.all().getOrThrow()
             val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
-            hooker.hookMethods(data, param)
+            hookDispatcher.hookMethods(data, param)
         }.onFailure { logger.log(it.toString()) }
 
         logger.log("OpenFaker: Hooking done")

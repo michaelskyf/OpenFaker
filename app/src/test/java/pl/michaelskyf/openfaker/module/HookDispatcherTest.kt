@@ -13,13 +13,13 @@ import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
-class HookerTest {
+class HookDispatcherTest {
 
     @Test
     fun `hookMethods() should hook 2 methods with the same name of the same class to the same HookHandler`() {
         val hookHelper = mockk<HookHelper>()
         val dataTunnel = mockk<DataTunnel.Receiver>()
-        val hooker = Hooker(hookHelper, dataTunnel, TestLogger())
+        val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, TestLogger())
 
         class TestClass {
             fun method() {}
@@ -34,7 +34,7 @@ class HookerTest {
         every { hookHelper.findMethod(TestClass::class.java, "method", String::class.java) } returns Result.success(method2)
         every { hookHelper.hookMethod(any(), any()) } just runs
         mockkObject(HookHandler.Companion)
-        every { HookHandler.invoke(any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
+        every { HookHandler.invoke(any(), any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
 
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
@@ -46,8 +46,7 @@ class HookerTest {
         )
 
         val loadPackageParam = LoadPackageParam("some.package", this.javaClass.classLoader!!)
-        hooker.reloadMethodHooks(hooks)
-        hooker.hookMethods(loadPackageParam)
+        hookDispatcher.hookMethods(hooks, loadPackageParam)
 
         val handler1 = slot<HookHandler>()
         val handler2 = slot<HookHandler>()
@@ -61,7 +60,7 @@ class HookerTest {
     fun `hookMethods() should hook 2 methods of different classes to different HookHandlers`() {
         val hookHelper = mockk<HookHelper>()
         val dataTunnel = mockk<DataTunnel.Receiver>()
-        val hooker = Hooker(hookHelper, dataTunnel, TestLogger())
+        val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, TestLogger())
 
         class TestClass {
             fun method() {}
@@ -79,7 +78,7 @@ class HookerTest {
         every { hookHelper.findMethod(TestClass2::class.java, "method") } returns Result.success(method2)
         every { hookHelper.hookMethod(any(), any()) } just runs
         mockkObject(HookHandler.Companion)
-        every { HookHandler.invoke(any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
+        every { HookHandler.invoke(any(), any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
 
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
@@ -91,8 +90,7 @@ class HookerTest {
         )
 
         val loadPackageParam = LoadPackageParam("some.package", this.javaClass.classLoader!!)
-        hooker.reloadMethodHooks(hooks)
-        hooker.hookMethods(loadPackageParam)
+        hookDispatcher.hookMethods(hooks, loadPackageParam)
 
         val handler1 = slot<HookHandler>()
         val handler2 = slot<HookHandler>()
