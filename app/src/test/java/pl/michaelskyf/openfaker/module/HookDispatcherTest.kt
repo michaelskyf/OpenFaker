@@ -3,13 +3,13 @@ package pl.michaelskyf.openfaker.module
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import pl.michaelskyf.openfaker.TestLogger
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
+import pl.michaelskyf.openfaker.ui_module_bridge.FakerModuleFactory
 import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
@@ -33,14 +33,17 @@ class HookDispatcherTest {
         every { hookHelper.findMethod(TestClass::class.java, "method") } returns Result.success(method1)
         every { hookHelper.findMethod(TestClass::class.java, "method", String::class.java) } returns Result.success(method2)
         every { hookHelper.hookMethod(any(), any()) } just runs
-        mockkObject(HookHandler.Companion)
-        every { HookHandler.invoke(any(), any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
 
+        val fakerModule = mockk<FakerModule>()
+        every { fakerModule.getMatchingArgumentsInfo() } returns runCatching { MatchingArgumentsInfo(
+            mutableListOf(), mutableListOf()) }
+        val fakerModuleFactory = mockk<FakerModuleFactory>()
+        every { fakerModuleFactory.createFakerModule(any()) } returns runCatching { fakerModule }
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
                 arrayOf(
-                    HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before),
-                    HookData(HookData.WhichPackages.All(), arrayOf(String::class.java.name), mockk(), HookData.WhenToHook.After)
+                    HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
+                    HookData(HookData.WhichPackages.All(), arrayOf(String::class.java.name), fakerModuleFactory, HookData.WhenToHook.After)
                 )
             )
         )
@@ -77,15 +80,18 @@ class HookDispatcherTest {
         every { hookHelper.findMethod(TestClass::class.java, "method") } returns Result.success(method1)
         every { hookHelper.findMethod(TestClass2::class.java, "method") } returns Result.success(method2)
         every { hookHelper.hookMethod(any(), any()) } just runs
-        mockkObject(HookHandler.Companion)
-        every { HookHandler.invoke(any(), any(), any(), any(), any(), any()) } answers { Result.success(mockk(relaxed = true)) }
 
+        val fakerModule = mockk<FakerModule>()
+        every { fakerModule.getMatchingArgumentsInfo() } returns runCatching { MatchingArgumentsInfo(
+            mutableListOf(), mutableListOf()) }
+        val fakerModuleFactory = mockk<FakerModuleFactory>()
+        every { fakerModuleFactory.createFakerModule(any()) } returns runCatching { fakerModule }
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before))
+                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before))
             ),
             MethodData(TestClass2::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), mockk(), HookData.WhenToHook.Before))
+                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before))
             )
         )
 
