@@ -1,6 +1,7 @@
 package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.module.HookDispatcher
@@ -10,7 +11,7 @@ class XHook : IXposedHookLoadPackage {
 
     private val logger = XLogger()
     private val hookHelper = XHookHelper()
-    private val dataTunnel = XDataTunnel()
+    private val dataTunnel = XSharedPreferencesDataTunnel(XSharedPreferences(BuildConfig.APPLICATION_ID, "open_faker_module_method_hooks"))
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) return

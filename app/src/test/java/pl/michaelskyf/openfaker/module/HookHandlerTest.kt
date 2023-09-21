@@ -21,7 +21,7 @@ class HookHandlerTest {
     @Test
     fun `beforeHookedMethod() should run only a matching hook marked to run before the hooked function`() {
 
-        val dataTunnel = mockk<DataTunnel.Receiver>()
+        val dataTunnel = mockk<DataTunnel>()
         val fakerModuleFactory = mockk<FakerModuleFactory>()
         val fakerModule = mockk<FakerModule>()
         every { fakerModule.getMatchingArgumentsInfo() } returns Result.success(
@@ -33,10 +33,10 @@ class HookHandlerTest {
         every { fakerModule.run(any()) } returns Result.success(true)
         every { fakerModuleFactory.createFakerModule(any()) } returns Result.success(fakerModule)
         val hooks = arrayOf(
-            HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
-            HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.After)
+            HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
+            HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.After)
         )
-        every { dataTunnel.runIfChanged(any(), any(), any()) } returns Result.success(Unit)
+        every { dataTunnel.hasHookChanged(any(), any()) } returns false
 
         val hookHandler = HookHandler("some.package", "some.class",
             "someMethod", TestLogger(), dataTunnel, hooks).getOrThrow()

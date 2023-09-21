@@ -18,7 +18,7 @@ class HookDispatcherTest {
     @Test
     fun `hookMethods() should hook 2 methods with the same name of the same class to the same HookHandler`() {
         val hookHelper = mockk<HookHelper>()
-        val dataTunnel = mockk<DataTunnel.Receiver>()
+        val dataTunnel = mockk<DataTunnel>()
         val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, TestLogger())
 
         class TestClass {
@@ -42,8 +42,8 @@ class HookDispatcherTest {
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
                 arrayOf(
-                    HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
-                    HookData(HookData.WhichPackages.All(), arrayOf(String::class.java.name), fakerModuleFactory, HookData.WhenToHook.After)
+                    HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before),
+                    HookData(HookData.WhichPackages.All, arrayOf(String::class.java.name), fakerModuleFactory, HookData.WhenToHook.After)
                 )
             )
         )
@@ -62,7 +62,7 @@ class HookDispatcherTest {
     @Test
     fun `hookMethods() should hook 2 methods of different classes to different HookHandlers`() {
         val hookHelper = mockk<HookHelper>()
-        val dataTunnel = mockk<DataTunnel.Receiver>()
+        val dataTunnel = mockk<DataTunnel>()
         val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, TestLogger())
 
         class TestClass {
@@ -88,10 +88,10 @@ class HookDispatcherTest {
         every { fakerModuleFactory.createFakerModule(any()) } returns runCatching { fakerModule }
         val hooks = listOf(
             MethodData(TestClass::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before))
+                arrayOf(HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before))
             ),
             MethodData(TestClass2::class.java.name, "method",
-                arrayOf(HookData(HookData.WhichPackages.All(), arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before))
+                arrayOf(HookData(HookData.WhichPackages.All, arrayOf(), fakerModuleFactory, HookData.WhenToHook.Before))
             )
         )
 

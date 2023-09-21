@@ -9,28 +9,16 @@ class HookData(
     val fakerModuleFactory: FakerModuleFactory,
     val whenToHook: WhenToHook
 ) {
-    // Replaced sealed class with a "normal" class due to slow startup time of
-    // kotlin reflections needed to convert the sealed class to json
     @Serializable
-    class WhichPackages(
-        private val shouldCheck: Boolean,
-        private val matchingPackages: Array<String>
-    ) {
-        object Some{
-            operator fun invoke(matchingPackages: Array<String>)
-                = WhichPackages(true, matchingPackages)
-        }
-
-        object All{
-            operator fun invoke()
-                = WhichPackages(false, arrayOf())
-        }
+    sealed class WhichPackages {
+        data object All : WhichPackages()
+        data class Some(val packages: HashSet<String>) : WhichPackages()
 
         fun isMatching(packageName: String): Boolean
-            = when(shouldCheck) {
-                false -> true
-                true -> this.matchingPackages.contains(packageName)
-            }
+                = when(this) {
+            is All -> true
+            is Some -> packages.contains(packageName)
+        }
     }
 
     enum class WhenToHook {

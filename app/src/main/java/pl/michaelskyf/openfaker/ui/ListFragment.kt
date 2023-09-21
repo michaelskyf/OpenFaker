@@ -1,6 +1,8 @@
 package pl.michaelskyf.openfaker.ui
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -34,35 +36,8 @@ class ListFragment : Fragment() {
     }
 
     private fun createProperties(): List<Property> = buildList {
-        val fakerData = UIDataTunnel(requireContext()).getOrThrow()
-
-        /*val lua = """
-            function registerModule(moduleRegistry)
-                moduleRegistry:exactMatchArguments({argument:ignore()})
-            end
-
-            function runModule(hookParameters)
-                local arguments = hookParameters:getArguments()
-                local obj = hookParameters:getThisObject()
-                local method = hookParameters:getMethod()
-
-                local result = method:invoke(obj, {"/sdcard/Music/WakacyjnyRomans.opus"})
-                logger:log("Hi")
-                hookParameters:setResult(result)
-
-                return true
-            end
-        """.trimIndent()
-
-        val result = fakerData.set(MediaPlayer::class.java.name, "setDataSource", arrayOf(
-            MethodHookHolder(
-                MediaPlayer::class.java.name,
-                "setDataSource",
-                arrayOf(String::class.java.name),
-                LuaFakerModuleFactory(lua, 0),
-                MethodHookHolder.WhenToHook.Before
-            )
-        ))*/
+        val prefs = requireContext().getSharedPreferences("open_faker_module_method_hooks", Context.MODE_WORLD_READABLE)
+        val dataTunnel = UISharedPreferencesMutableDataTunnel(prefs)
 
         val appId = "pl.nextcamera"
         val activity = "$appId.MainActivity"
@@ -108,9 +83,9 @@ class ListFragment : Fragment() {
             end
         """.trimIndent()
 
-        val result = fakerData.set("com.android.systemui.statusbar.phone.KeyguardBottomAreaView", "launchCamera", arrayOf(
+        val result = dataTunnel.set("com.android.systemui.statusbar.phone.KeyguardBottomAreaView", "launchCamera", arrayOf(
             HookData(
-                HookData.WhichPackages.Some(arrayOf("com.android.systemui")),
+                HookData.WhichPackages.Some(hashSetOf("com.android.systemui")),
                 arrayOf(String::class.java.name),
                 LuaFakerModuleFactory(lua, 0),
                 HookData.WhenToHook.Before
@@ -131,9 +106,9 @@ class ListFragment : Fragment() {
                 return false
             end
         """.trimIndent()
-        fakerData.set(activity, "onCreate", arrayOf(
+        dataTunnel.set(activity, "onCreate", arrayOf(
             HookData(
-                HookData.WhichPackages.Some(arrayOf("pl.nextcamera")),
+                HookData.WhichPackages.Some(hashSetOf("pl.nextcamera")),
                 arrayOf(Bundle::class.java.name),
                 LuaFakerModuleFactory(lua2, 0),
                 HookData.WhenToHook.Before
