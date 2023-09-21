@@ -12,8 +12,8 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
         className: String,
         methodName: String,
         hookData: Array<HookData>
-    ): Result<Unit> {
-        TODO("Not yet implemented")
+    ): Result<Unit> = runCatching {
+        edit().putMethodData(MethodData(className, methodName, hookData)).getOrThrow().commit()
     }
 
     override fun edit(action: MutableDataTunnel.Editor.() -> Unit) {
@@ -23,7 +23,7 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
     override fun edit(): MutableDataTunnel.Editor
         = Editor(prefs.edit())
 
-    override fun get(className: String, methodName: String): Result<Array<HookData>> {
+    override fun get(className: String, methodName: String): Result<MethodData> {
         TODO("Not yet implemented")
     }
 

@@ -59,8 +59,9 @@ class HookHandler private constructor(
         if (dataTunnel.hasHookChanged(className, methodName)) runCatching {
             val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
 
-            val hooks = dataTunnel[className, methodName].getOrThrow().filter { it.whichPackages.isMatching(packageName) }
-            for (holder in hooks) {
+            val allHooks = dataTunnel[className, methodName].getOrThrow()
+            val packageHooks = allHooks.hookData.filter { it.whichPackages.isMatching(packageName) }
+            for (holder in packageHooks) {
                 val registry = when (holder.whenToHook) {
                     HookData.WhenToHook.Before -> registries.first
                     HookData.WhenToHook.After -> registries.second

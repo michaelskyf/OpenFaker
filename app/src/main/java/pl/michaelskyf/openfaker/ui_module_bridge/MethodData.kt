@@ -1,5 +1,8 @@
 package pl.michaelskyf.openfaker.ui_module_bridge
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class MethodData(val className: String, val methodName: String, val hookData: Array<HookData>) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

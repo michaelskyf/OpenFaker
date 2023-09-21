@@ -8,7 +8,7 @@ import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
 class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataTunnel {
     private var modifiedKeys: HashSet<String> = hashSetOf()
-    override fun get(className: String, methodName: String): Result<Array<HookData>> = runCatching {
+    override fun get(className: String, methodName: String): Result<MethodData> = runCatching {
         val key = "$className.$methodName"
         val json = prefs.getString(key, null)
             ?: throw Exception("Failed to get json from $key")
@@ -28,15 +28,7 @@ class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataT
         modifiedKeys.clear()
 
         val rawData = prefs.all.filterKeys { it != "modifiedKeys" } as Map<String, String>
-        val classHookerDataArray = rawData.map {
-            val classMethod = it.key
-            val className = classMethod.substringBeforeLast('.')
-            val methodName = classMethod.substringAfterLast('.')
-
-            val dataArray = Json.decodeFromString<Array<HookData>>(it.value)
-
-            MethodData(className, methodName, dataArray)
-        }
+        val classHookerDataArray = rawData.map { Json.decodeFromString<MethodData>(it.value) }
 
         classHookerDataArray
     }

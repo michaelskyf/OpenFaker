@@ -11,7 +11,9 @@ class HookData(
 ) {
     @Serializable
     sealed class WhichPackages {
+        @Serializable
         data object All : WhichPackages()
+        @Serializable
         data class Some(val packages: HashSet<String>) : WhichPackages()
 
         fun isMatching(packageName: String): Boolean
