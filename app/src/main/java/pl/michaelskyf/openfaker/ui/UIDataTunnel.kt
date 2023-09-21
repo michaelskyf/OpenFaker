@@ -4,12 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 
-class UIFakerData private constructor(
+class UIDataTunnel private constructor(
     private val sharedPreferences: SharedPreferences
 ): DataTunnel.Sender {
     companion object {
-        operator fun invoke(context: Context): Result<UIFakerData> = runCatching {
-            UIFakerData(context.getSharedPreferences(DataTunnel.fakerDataFileName, Context.MODE_WORLD_READABLE))
+        private const val fakerDataFileName = "open_faker_module_method_hooks"
+        operator fun invoke(context: Context): Result<UIDataTunnel> = runCatching {
+            UIDataTunnel(context.getSharedPreferences(fakerDataFileName, Context.MODE_WORLD_READABLE))
         }
     }
 

@@ -34,7 +34,7 @@ class ListFragment : Fragment() {
     }
 
     private fun createProperties(): List<Property> = buildList {
-        val fakerData = UIFakerData(requireContext()).getOrThrow()
+        val fakerData = UIDataTunnel(requireContext()).getOrThrow()
 
         /*val lua = """
             function registerModule(moduleRegistry)

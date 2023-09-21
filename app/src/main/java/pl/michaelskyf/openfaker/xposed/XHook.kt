@@ -10,7 +10,7 @@ class XHook : IXposedHookLoadPackage {
 
     private val logger = XLogger()
     private val hookHelper = XHookHelper()
-    private val moduleData = XFakerData()
+    private val moduleData = XDataTunnel()
     private val hookDispatcher = HookDispatcher(hookHelper, moduleData, logger)
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {

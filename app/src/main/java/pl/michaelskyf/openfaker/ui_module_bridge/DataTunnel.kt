@@ -4,9 +4,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 interface DataTunnel {
-    companion object {
-        const val fakerDataFileName = "open_faker_module_method_hooks"
-    }
 
     abstract class Receiver {
         private var modifiedKeys: HashSet<String> = hashSetOf()
