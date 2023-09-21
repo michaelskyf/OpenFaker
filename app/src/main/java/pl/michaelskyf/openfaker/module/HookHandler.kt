@@ -9,7 +9,7 @@ class HookHandler private constructor(
     private val className: String,
     private val methodName: String,
     private val logger: Logger,
-    private val dataTunnel: DataTunnel.Receiver,
+    private val dataTunnel: DataTunnel,
     private var fakerRegistries: Pair<FakerModuleRegistry, FakerModuleRegistry>
     ) {
 
@@ -19,7 +19,7 @@ class HookHandler private constructor(
             className: String,
             methodName: String,
             logger: Logger,
-            dataTunnel: DataTunnel.Receiver,
+            dataTunnel: DataTunnel,
             hooks: Array<HookData>
         ): Result<HookHandler> = runCatching {
             val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
@@ -56,7 +56,7 @@ class HookHandler private constructor(
     }
 
     private fun updateRegistries() {
-        dataTunnel.runIfChanged(className, methodName) {
+        if (dataTunnel.hasHookChanged(className, methodName)) runCatching {
             val registries = Pair(FakerModuleRegistry(), FakerModuleRegistry())
 
             val hooks = dataTunnel[className, methodName].getOrThrow().filter { it.whichPackages.isMatching(packageName) }

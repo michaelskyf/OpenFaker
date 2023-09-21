@@ -7,14 +7,12 @@ import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 // TODO: Thread safety
 class HookDispatcher(
     private val hookHelper: HookHelper,
-    private val dataTunnel: DataTunnel.Receiver,
+    private val dataTunnel: DataTunnel,
     private val logger: Logger
     ) {
+    private val resolvedClassCache = mutableMapOf<String, Class<*>>()
+
     fun hookMethods(methodsToHook: List<MethodData>, param: LoadPackageParam) {
-
-        // Classes may only be cached per-package, since specific classes may not be accessible in all packages
-        val resolvedClassCache = mutableMapOf<String, Class<*>>()
-
         for (methodData in methodsToHook) runCatching {
             val className = methodData.className
             val classLoader = param.classLoader
@@ -24,11 +22,11 @@ class HookDispatcher(
             if (hooks.isEmpty()) return@runCatching
 
             val hookHandler = HookHandler(packageName, className, methodName, logger, dataTunnel, hooks).getOrThrow()
-            val declaringClass = resolveDeclaringClass(methodData, classLoader, resolvedClassCache).getOrThrow()
+            val declaringClass = resolveDeclaringClass(methodData, classLoader).getOrThrow()
 
             for (hookData in hooks) runCatching {
 
-                val argumentTypes = resolveArgumentTypes(hookData, classLoader, resolvedClassCache).getOrThrow()
+                val argumentTypes = resolveArgumentTypes(hookData, classLoader).getOrThrow()
 
                 val method = hookHelper.findMethod(declaringClass, methodName, *argumentTypes).getOrThrow()
 
@@ -39,8 +37,7 @@ class HookDispatcher(
 
     private fun resolveArgumentTypes(
         methodInfo: HookData,
-        classLoader: ClassLoader,
-        resolvedClassCache: MutableMap<String, Class<*>>
+        classLoader: ClassLoader
     ) = runCatching {
         methodInfo.argumentTypes.map {
             resolvedClassCache.getOrPut(it) { hookHelper.findClass(it, classLoader).getOrThrow() }
@@ -49,8 +46,7 @@ class HookDispatcher(
 
     private fun resolveDeclaringClass(
         methodInfo: MethodData,
-        classLoader: ClassLoader,
-        resolvedClassCache: MutableMap<String, Class<*>>
+        classLoader: ClassLoader
     ) = runCatching {
         resolvedClassCache.getOrPut(methodInfo.className) { hookHelper.findClass(methodInfo.className, classLoader).getOrThrow() }
     }

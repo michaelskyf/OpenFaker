@@ -3,31 +3,29 @@ package pl.michaelskyf.openfaker.xposed
 import de.robv.android.xposed.XSharedPreferences
 import pl.michaelskyf.openfaker.BuildConfig
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
+import pl.michaelskyf.openfaker.ui_module_bridge.HookData
+import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
-class XDataTunnel private constructor(private val sharedPreferences: XSharedPreferences): DataTunnel.Receiver() {
-    private val fakerDataFileName = "open_faker_module_method_hooks"
+class XDataTunnel private constructor(private val sharedPreferences: XSharedPreferences): DataTunnel {
 
     companion object {
-        private const val fakerDataFileName = "open_faker_module_method_hooks"
         operator fun invoke(): XDataTunnel {
-            val sharedPreferences = XSharedPreferences(BuildConfig.APPLICATION_ID, fakerDataFileName)
-            sharedPreferences.makeWorldReadable()
-
-            return XDataTunnel(sharedPreferences)
+            TODO()
         }
     }
-
-    override fun implReload(): Boolean {
-        if (!sharedPreferences.hasFileChanged()) return false
-
-        sharedPreferences.reload()
-
-        return true
+    override fun get(className: String, methodName: String): Result<Array<HookData>> {
+        TODO("Not yet implemented")
     }
 
-    override fun getString(key: String): String?
-        = sharedPreferences.getString(key, null)
+    override fun hasHookChanged(className: String, methodName: String): Boolean {
+        TODO("Not yet implemented")
+    }
 
-    override fun implAll(): Map<String, String>
-        = sharedPreferences.all as Map<String, String>
+    override fun getAllHooks(): Result<List<MethodData>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun reload(): Boolean {
+        TODO("Not yet implemented")
+    }
 }
