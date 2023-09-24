@@ -16,15 +16,17 @@ class XHook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) return
 
-        logger.log("OpenFaker: New app: " + lpparam.packageName)
+        logger.log("New app: " + lpparam.packageName)
 
         runCatching {
+            logger.log("1")
             val data = dataTunnel.getAllHooks().getOrThrow()
+            logger.log("2")
             val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
             val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, logger)
             hookDispatcher.hookMethods(data, param)
         }.onFailure { logger.log(it.toString()) }
 
-        logger.log("OpenFaker: Hooking done")
+        logger.log("Hooking done")
     }
 }

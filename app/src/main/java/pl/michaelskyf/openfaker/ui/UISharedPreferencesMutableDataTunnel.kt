@@ -38,11 +38,11 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
     }
 
     override fun hasHookChanged(className: String, methodName: String): Boolean {
-        TODO("Not yet implemented")
+        TODO("Not yet implemented1")
     }
 
     override fun getAllHooks(): Result<List<MethodData>> {
-        TODO("Not yet implemented")
+        TODO("Not yet implemented2")
     }
 
     class Editor(private val editor: SharedPreferences.Editor): MutableDataTunnel.Editor {
