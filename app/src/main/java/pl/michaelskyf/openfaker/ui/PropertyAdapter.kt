@@ -39,11 +39,13 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
     }
 
     override fun onBindViewHolder(holder: PropertyViewHolder, position: Int) {
-        holder.icon.foreground = properties[position].icon
-        holder.name.text = properties[position].name
-        holder.realValue.text = properties[position].getRealValue()
+        val property = properties[position]
+
+        holder.icon.foreground = property.icon
+        holder.name.text = property.name
+        holder.realValue.text = property.getRealValue()
         holder.fakeValue.text = "TODO"
-        holder.isActive.isChecked = properties[position].isActive
+        holder.isActive.isChecked = property.isActive
 
         val switchCallback = {
             button: CompoundButton, isChecked: Boolean ->
@@ -54,13 +56,10 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
             }
 
             Log.d(BuildConfig.APPLICATION_ID, button.isChecked.toString())
-            if (updatedCallback(button.context))
-            {
-                holder.currentValue.text = value
 
-            } else {
-
-                button.isChecked = !isChecked
+            when(publishHook(button.context, property).isSuccess) {
+                true -> holder.currentValue.text = value
+                false -> button.isChecked = !isChecked
             }
         }
 
@@ -95,8 +94,11 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
 
     }
 
-    private fun updatedCallback(context: Context): Boolean {
+    private fun publishHook(context: Context, property: Property) = runCatching {
+        val prefs = context.getSharedPreferences("open_faker_module_method_hooks", Context.MODE_WORLD_READABLE)
+        val dataTunnel = UISharedPreferencesMutableDataTunnel(prefs)
 
-        return true
+        val methodData = property.methodData
+        dataTunnel[methodData.className, methodData.methodName] = methodData.hookData
     }
 }

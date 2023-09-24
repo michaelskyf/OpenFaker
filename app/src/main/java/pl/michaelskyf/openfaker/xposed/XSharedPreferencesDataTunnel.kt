@@ -25,6 +25,7 @@ class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataT
     }
 
     override fun getAllHooks(): Result<List<MethodData>> = runCatching {
+        reload()
         modifiedKeys.clear()
 
         val rawData = prefs.all.filterKeys { it != "modifiedKeys" } as Map<String, String>
@@ -33,7 +34,8 @@ class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataT
         classHookerDataArray
     }
 
-    override fun reload(): Boolean {
+    // TODO: Remove reload(). It is present due to XSharedPreferences hack. It should be removed ASAP, since it's slow and hacky
+    private fun reload(): Boolean {
         if (!prefs.hasFileChanged()) return false
 
         prefs.reload()

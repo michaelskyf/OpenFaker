@@ -62,6 +62,7 @@ dependencies {
     compileOnly("de.robv.android.xposed:api:82")
     implementation("org.luaj:luaj-jse:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
 }
 
 tasks.withType<Test>().configureEach {

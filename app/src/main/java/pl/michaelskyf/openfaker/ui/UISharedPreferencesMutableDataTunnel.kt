@@ -23,8 +23,12 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
     override fun edit(): MutableDataTunnel.Editor
         = Editor(prefs.edit())
 
-    override fun get(className: String, methodName: String): Result<MethodData> {
-        TODO("Not yet implemented")
+    override fun get(className: String, methodName: String): Result<MethodData> = runCatching {
+        val key = "$className.$methodName"
+        val json = prefs.getString(key, null)
+            ?: throw Exception("Failed to get json from $key")
+
+        Json.decodeFromString(json)
     }
 
     override fun hasHookChanged(className: String, methodName: String): Boolean {
@@ -32,10 +36,6 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
     }
 
     override fun getAllHooks(): Result<List<MethodData>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun reload(): Boolean {
         TODO("Not yet implemented")
     }
 
