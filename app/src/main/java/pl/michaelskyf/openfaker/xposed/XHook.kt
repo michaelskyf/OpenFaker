@@ -19,9 +19,7 @@ class XHook : IXposedHookLoadPackage {
         logger.log("New app: " + lpparam.packageName)
 
         runCatching {
-            logger.log("1")
             val data = dataTunnel.getAllHooks().getOrThrow()
-            logger.log("2")
             val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
             val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, logger)
             hookDispatcher.hookMethods(data, param)

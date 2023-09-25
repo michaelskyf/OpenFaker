@@ -1,5 +1,6 @@
 package pl.michaelskyf.openfaker.lua
 
+import org.luaj.vm2.Globals
 import org.luaj.vm2.LuaFunction
 import org.luaj.vm2.lib.jse.CoerceJavaToLua
 import org.luaj.vm2.lib.jse.JsePlatform
@@ -17,7 +18,12 @@ class LuaFakerModule private constructor(
 ) : FakerModule(priority) {
 
     companion object {
-        operator fun invoke(priority: Int, luaSource: String, logger: Logger): Result<FakerModule>
+        operator fun invoke(
+            luaSource: String,
+            userData: Array<String>?,
+            priority: Int,
+            logger: Logger
+        ): Result<FakerModule>
             = runCatching {
                 val globals = JsePlatform.standardGlobals()
                 globals.load(luaSource).call()
@@ -27,8 +33,18 @@ class LuaFakerModule private constructor(
                 val registerModule = globals.get("registerModule").checkfunction()
                 val runModule = globals.get("runModule").checkfunction()
 
+                if (!isUserDataValid(globals, userData)) throw Exception("Invalid userData")
+
                 LuaFakerModule(priority, runModule, registerModule)
             }
+
+        private fun isUserDataValid(globals: Globals, userData: Array<String>?): Boolean = runCatching {
+            val parser = globals.get("parseUserData").checkfunction()
+
+            runCatching {
+                parser.call(CoerceJavaToLua.coerce(userData)).checkboolean()
+            }.getOrDefault(false)
+        }.getOrDefault(true)
     }
 
     override fun run(hookParameters: HookParameters): Result<Boolean>

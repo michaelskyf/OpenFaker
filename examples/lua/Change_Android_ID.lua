@@ -1,5 +1,5 @@
 --[[
-    Global variables set by the LuaModule class:
+    Global variables set by the LuaFakerModule class:
         1) argument (Class)
             This class is used to mark values as ignored or required in exactMatchArguments().
             Methods:
@@ -22,6 +22,22 @@ function matchArguments(...)
     end
 
     return false
+end
+
+--[[
+    This function is called when constructing LuaFakerModule class
+
+	Return true/false to:
+		(true) 	proceed with the construction of LuaFakerModule
+		(false) make the constructor of LuaFakerModule return an error which tells that the userData is invalid
+	Not returning a boolean value is interpreted as true
+
+    userData is an array of strings or nil
+
+	Note: This function is optional, you may skip it entirely (interpreted as true)
+--]]
+function parseUserData(userData)
+	return true
 end
 
 --[[
