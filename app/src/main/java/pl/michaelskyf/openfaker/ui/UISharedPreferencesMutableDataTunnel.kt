@@ -53,7 +53,6 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
 
         override fun commit(): Boolean {
             val json = Json.encodeToString(modifiedKeys.toTypedArray())
-            editor.putString("modifiedKeys", json)
 
             return editor.commit()
         }

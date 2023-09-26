@@ -1,21 +1,14 @@
 package pl.michaelskyf.openfaker.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.provider.Settings.Secure
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.LinearLayoutManager
-import pl.michaelskyf.openfaker.R
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
 import pl.michaelskyf.openfaker.ui.modules.AndroidID
-import pl.michaelskyf.openfaker.ui_module_bridge.HookData
-import pl.michaelskyf.openfaker.ui_module_bridge.LuaFakerModuleFactory
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
 class ListFragment : Fragment() {
@@ -41,7 +34,6 @@ class ListFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("HardwareIds")
     private fun createProperties(): List<Property> {
         val context = requireContext()
 
@@ -71,9 +63,6 @@ class ListFragment : Fragment() {
 
         return false
     }
-
-    private fun getIcon(id: Int): Drawable
-        = AppCompatResources.getDrawable(requireContext(), id)!!
 
     override fun onDestroyView() {
         super.onDestroyView()

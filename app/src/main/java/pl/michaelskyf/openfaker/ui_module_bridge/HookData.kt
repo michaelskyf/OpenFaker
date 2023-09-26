@@ -34,6 +34,7 @@ class HookData(
 
         other as HookData
 
+        if (whichPackages != other.whichPackages) return false
         if (!argumentTypes.contentEquals(other.argumentTypes)) return false
         if (fakerModuleFactory != other.fakerModuleFactory) return false
         if (whenToHook != other.whenToHook) return false
@@ -42,7 +43,8 @@ class HookData(
     }
 
     override fun hashCode(): Int {
-        var result = argumentTypes.contentHashCode()
+        var result = whichPackages.hashCode()
+        result = 31 * result + argumentTypes.contentHashCode()
         result = 31 * result + fakerModuleFactory.hashCode()
         result = 31 * result + whenToHook.hashCode()
         return result
