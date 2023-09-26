@@ -42,7 +42,11 @@ class LuaFakerModule private constructor(
             val parser = globals.get("parseUserData").checkfunction()
 
             runCatching {
-                parser.call(CoerceJavaToLua.coerce(userData)).checkboolean()
+                val result = parser.call(CoerceJavaToLua.coerce(userData))
+                when (result.isboolean()) {
+                    true -> result.checkboolean()
+                    false -> true
+                }
             }.getOrDefault(false)
         }.getOrDefault(true)
     }

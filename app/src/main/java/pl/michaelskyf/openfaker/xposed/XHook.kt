@@ -23,8 +23,8 @@ class XHook : IXposedHookLoadPackage {
             val param = LoadPackageParam(lpparam.packageName, lpparam.classLoader)
             val hookDispatcher = HookDispatcher(hookHelper, dataTunnel, logger)
             hookDispatcher.hookMethods(data, param)
-        }.onFailure { logger.log(it.toString()) }
 
-        logger.log("Hooking done")
+            logger.log("Hooking done")
+        }.onFailure { logger.log(it.toString()) }
     }
 }

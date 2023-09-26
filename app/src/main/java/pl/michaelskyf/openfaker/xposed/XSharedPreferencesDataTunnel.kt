@@ -2,8 +2,7 @@ package pl.michaelskyf.openfaker.xposed
 
 import de.robv.android.xposed.XSharedPreferences
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromHexString
-import kotlinx.serialization.protobuf.ProtoBuf
+import kotlinx.serialization.json.Json
 import pl.michaelskyf.openfaker.ui_module_bridge.DataTunnel
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
 
@@ -17,7 +16,7 @@ class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataT
             ?: throw Exception("Failed to get json from $key")
 
         modifiedKeys.remove(key)
-        ProtoBuf.decodeFromHexString(encodedObject)
+        Json.decodeFromString(encodedObject)
     }
 
     override fun hasHookChanged(className: String, methodName: String): Boolean {
@@ -32,7 +31,7 @@ class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataT
         modifiedKeys.clear()
 
         val rawData = prefs.all.filterKeys { it != "modifiedKeys" } as Map<String, String>
-        val classHookerDataArray = rawData.map { ProtoBuf.decodeFromHexString<MethodData>(it.value) }
+        val classHookerDataArray = rawData.map { Json.decodeFromString<MethodData>(it.value) }
 
         classHookerDataArray
     }
@@ -44,7 +43,7 @@ class XSharedPreferencesDataTunnel(private val prefs: XSharedPreferences): DataT
         prefs.reload()
 
         val rawModifiedKeys = prefs.getString("modifiedKeys", null) ?: return false
-        val newModifiedKeys = ProtoBuf.decodeFromHexString<Array<String>>(rawModifiedKeys)
+        val newModifiedKeys = Json.decodeFromString<Array<String>>(rawModifiedKeys)
 
         modifiedKeys.addAll(newModifiedKeys)
 

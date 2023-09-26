@@ -13,6 +13,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.michaelskyf.openfaker.R
 import pl.michaelskyf.openfaker.databinding.FragmentListBinding
+import pl.michaelskyf.openfaker.ui.modules.AndroidID
 import pl.michaelskyf.openfaker.ui_module_bridge.HookData
 import pl.michaelskyf.openfaker.ui_module_bridge.LuaFakerModuleFactory
 import pl.michaelskyf.openfaker.ui_module_bridge.MethodData
@@ -42,13 +43,10 @@ class ListFragment : Fragment() {
 
     @SuppressLint("HardwareIds")
     private fun createProperties(): List<Property> {
+        val context = requireContext()
+
         val properties = listOf(
-            Property(
-                getIcon(R.drawable.ic_launcher_foreground), "Android ID",
-                { Secure.getString(requireContext().contentResolver, Secure.ANDROID_ID) },
-                MethodData("android.provider.Settings\$Secure", "getString", arrayOf()),
-                false
-            )
+            AndroidID.getProperty(context)
         )
 
         properties.forEach {
