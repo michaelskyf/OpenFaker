@@ -1,5 +1,5 @@
 # OpenFaker
-### XPosed module faking system information
+### XPosed module which fakes system information
 
 [//]: # (TODO: Add an image showcasing the user interface) 
 
