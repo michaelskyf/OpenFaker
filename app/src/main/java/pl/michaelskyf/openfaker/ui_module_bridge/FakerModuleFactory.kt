@@ -7,4 +7,5 @@ import pl.michaelskyf.openfaker.module.Logger
 @Serializable
 sealed interface FakerModuleFactory {
     fun createFakerModule(logger: Logger): Result<FakerModule>
+    fun setUserData(userData: Array<String>)
 }

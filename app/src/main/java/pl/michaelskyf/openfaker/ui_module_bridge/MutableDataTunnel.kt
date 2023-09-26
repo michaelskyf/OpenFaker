@@ -6,6 +6,7 @@ interface MutableDataTunnel: DataTunnel {
     fun edit(): Editor
     interface Editor {
         fun putMethodData(methodData: MethodData): Result<Editor>
+        fun remove(methodData: MethodData): Result<Editor>
         fun commit(): Boolean
     }
 }

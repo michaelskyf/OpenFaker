@@ -55,11 +55,21 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
                 false -> holder.realValue.text
             }
 
-            Log.d(BuildConfig.APPLICATION_ID, button.isChecked.toString())
-
-            when(publishHook(button.context, property).isSuccess) {
-                true -> holder.currentValue.text = value
-                false -> button.isChecked = !isChecked
+            property.methodData.hookData.first().fakerModuleFactory.setUserData(arrayOf(holder.fakeValue.text.toString()))
+            if (isChecked) {
+                when(publishHook(button.context, property).isSuccess) {
+                    true -> {
+                        holder.currentValue.text = value
+                    }
+                    false -> button.isChecked = false
+                }
+            } else {
+                when(removeHook(button.context, property).isSuccess) {
+                    true -> {
+                        holder.currentValue.text = value
+                    }
+                    false -> button.isChecked = true
+                }
             }
         }
 
@@ -100,5 +110,13 @@ class PropertyAdapter(private val properties: List<Property>) : RecyclerView.Ada
 
         val methodData = property.methodData
         dataTunnel[methodData.className, methodData.methodName] = methodData.hookData
+    }
+
+    private fun removeHook(context: Context, property: Property) = runCatching {
+        val prefs = context.getSharedPreferences("open_faker_module_method_hooks", Context.MODE_WORLD_READABLE)
+        val dataTunnel = UISharedPreferencesMutableDataTunnel(prefs)
+
+        val methodData = property.methodData
+        dataTunnel.edit().remove(methodData).getOrThrow().commit()
     }
 }

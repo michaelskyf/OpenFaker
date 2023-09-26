@@ -10,6 +10,10 @@ class TestFakerModuleFactory : FakerModuleFactory {
         TODO("Not yet implemented")
     }
 
+    override fun setUserData(userData: Array<String>) {
+        TODO("Not yet implemented")
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -51,6 +51,13 @@ class UISharedPreferencesMutableDataTunnel(private val prefs: SharedPreferences)
             this
         }
 
+        override fun remove(methodData: MethodData): Result<MutableDataTunnel.Editor> = runCatching {
+            val key = "${methodData.className}.${methodData.methodName}"
+            editor.remove(key)
+
+            this
+        }
+
         override fun commit(): Boolean {
             val json = Json.encodeToString(modifiedKeys.toTypedArray())
 

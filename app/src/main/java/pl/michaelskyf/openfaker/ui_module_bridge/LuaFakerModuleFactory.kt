@@ -6,9 +6,13 @@ import pl.michaelskyf.openfaker.module.FakerModule
 import pl.michaelskyf.openfaker.module.Logger
 
 @Serializable
-class LuaFakerModuleFactory(private val luaScript: String, private val userData: Array<String>?, private val priority: Int): FakerModuleFactory {
+class LuaFakerModuleFactory(private val luaScript: String, private var userData: Array<String>?, private val priority: Int): FakerModuleFactory {
     override fun createFakerModule(logger: Logger): Result<FakerModule>
         = LuaFakerModule(luaScript, userData, priority, logger)
+
+    override fun setUserData(userData: Array<String>) {
+        this.userData = userData
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -17,10 +21,6 @@ class LuaFakerModuleFactory(private val luaScript: String, private val userData:
         other as LuaFakerModuleFactory
 
         if (luaScript != other.luaScript) return false
-        if (userData != null) {
-            if (other.userData == null) return false
-            if (!userData.contentEquals(other.userData)) return false
-        } else if (other.userData != null) return false
         if (priority != other.priority) return false
 
         return true
