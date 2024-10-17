@@ -1,4 +1,4 @@
-# DEPRECATED!!!
+# DEPRECATED & NOT FINISHED!!!
 Once I find some free time, I'll rewrite it
 
 # OpenFaker
