@@ -1,3 +1,6 @@
+# DEPRECATED!!!
+Once I find some free time, I'll rewrite it
+
 # OpenFaker
 ### XPosed module which fakes system information
 
