@@ -1,5 +1,5 @@
 # DEPRECATED & NOT FINISHED!!!
-Once I find some free time, I'll rewrite it
+Once I find some free time, I'll rewrite it ( sadly, I study and work at the same time 😢 )
 
 # OpenFaker
 ### XPosed module which fakes system information
